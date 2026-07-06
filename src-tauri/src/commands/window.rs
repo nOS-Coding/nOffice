@@ -41,7 +41,7 @@ fn setup_app_menu(
     _window: &tauri::WebviewWindow,
     _app_id: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    #[cfg(target_os = "macOS")]
+    #[cfg(target_os = "macos")]
     {
         use tauri::menu::{MenuBuilder, SubmenuBuilder};
         let app = _window.app_handle();

@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use sled::Db;
-use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tracing::info;
@@ -44,7 +43,7 @@ impl EmbeddingQueue {
                 let mock_vector: Vec<f32> = vec![0.0; 4096];
                 let result = EmbeddingResult {
                     task_id: task.id,
-                    document_id: task.document_id,
+                    document_id: task.document_id.clone(),
                     vector: mock_vector,
                 };
                 if let Ok(data) = serde_json::to_vec(&result) {

@@ -1,5 +1,6 @@
 use anyhow::Result;
 use std::sync::Arc;
+use tauri::Emitter;
 use tokio::sync::Mutex;
 use tracing::{error, info};
 
@@ -16,9 +17,7 @@ struct AiManagerInner {
     llm_backend: Option<LlmBackend>,
 }
 
-struct LlmBackend {
-    context: *mut std::ffi::c_void,
-}
+struct LlmBackend;
 
 impl AiManager {
     pub fn new() -> Self {

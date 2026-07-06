@@ -1,5 +1,4 @@
 use anyhow::Result;
-use std::path::PathBuf;
 
 use super::model::ModelInfo;
 
