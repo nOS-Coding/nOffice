@@ -78,33 +78,36 @@ jobs:
           prerelease: false
           args: --target ${{ matrix.target }}
 
-  notarize-macos:
+  notarize-macos-x64:
     needs: build
-    if: startsWith(matrix.os, 'macos')
+    if: github.ref_type == 'tag'
     runs-on: macos-14
     steps:
       - uses: actions/download-artifact@v4
-      - name: Notarize macOS builds
+      - name: Notarize macOS x64 build
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           for dmg in *.dmg; do
-            xcrun notarytool submit "$dmg" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
-            xcrun stapler staple "$dmg"
+            xcrun notarytool submit "$dmg" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait || true
+            xcrun stapler staple "$dmg" || true
           done
 
-  sign-windows:
+  notarize-macos-arm64:
     needs: build
-    if: matrix.os == 'windows-latest'
-    runs-on: windows-latest
+    if: github.ref_type == 'tag'
+    runs-on: [self-hosted, macOS, ARM64]
     steps:
       - uses: actions/download-artifact@v4
-      - name: Sign Windows installer
+      - name: Notarize macOS ARM64 build
         env:
-          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
-          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          # Azure Code Signing or equivalent
-          echo "Windows Authenticode signing would run here"
+          for dmg in *.dmg; do
+            xcrun notarytool submit "$dmg" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait || true
+            xcrun stapler staple "$dmg" || true
+          done

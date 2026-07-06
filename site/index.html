@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>nOffice — Desktop Office Suite</title>
-<meta name="description" content="nOffice is a cross-platform desktop office suite. nWrite, nSheet, nSlides, nImg, nCode — all offline, all private.">
+<meta name="description" content="nOffice is a cross-platform desktop office suite. nWrite, nSheet, nSlides, nImg, nCode — no cloud, all private.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
 
@@ -21,7 +21,6 @@
   --gray-500: #71717a;
   --gray-400: #a1a1aa;
   --gray-300: #d4d4d8;
-  --gray-200: #e4e4e7;
   --gray-100: #f4f4f5;
   --blue: #4c6ef5;
   --blue-dim: rgba(76, 110, 245, 0.12);
@@ -110,18 +109,13 @@ nav {
 .hero-badge span { color: var(--blue); }
 
 .hero h1 {
-  font-size: clamp(1.75rem, 5vw, 3rem); font-weight: 700;
-  color: var(--gray-100); line-height: 1.15; margin-bottom: 20px;
-}
-.hero h1 .highlight {
-  background: linear-gradient(135deg, var(--blue), var(--blue-bright));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700;
+  color: var(--gray-100); line-height: 1.15; margin-bottom: 16px;
 }
 
 .hero p {
   font-size: 1rem; color: var(--gray-500); max-width: 65%;
-  margin-bottom: 32px;
+  margin-bottom: 32px; line-height: 1.8;
 }
 @media (max-width: 50rem) { .hero p { max-width: 100%; } }
 
@@ -188,22 +182,9 @@ nav {
 .feature-card h4 { color: var(--gray-100); font-size: 0.9375rem; margin-bottom: 4px; }
 .feature-card p { color: var(--gray-500); font-size: 0.8125rem; line-height: 1.6; }
 
-.diagram {
-  background: var(--black-soft); border: 1px solid var(--gray-800);
-  border-radius: 6px; padding: 2rem; overflow-x: auto; margin-top: 24px;
-}
-.diagram pre { font-family: var(--fm); font-size: 0.8125rem; line-height: 1.6; color: var(--gray-500); }
-.diagram pre .hl { color: var(--blue); }
-.diagram pre .hl2 { color: var(--blue-bright); }
-
-.pricing-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 36rem;
-}
-@media (max-width: 36rem) { .pricing-grid { grid-template-columns: 1fr; } }
-
 .price-card {
   background: var(--black-soft); border: 1px solid var(--gray-800);
-  border-radius: 6px; padding: 28px 24px; text-align: center;
+  border-radius: 6px; padding: 28px 24px; text-align: center; max-width: 24rem;
   display: flex; flex-direction: column;
 }
 .price-card.featured { border-color: var(--blue); background: rgba(76,110,245,0.04); }
@@ -213,7 +194,7 @@ nav {
 .price-card ul { list-style: none; text-align: left; margin-bottom: 20px; flex: 1; }
 .price-card ul li { font-size: 0.8125rem; color: var(--gray-400); padding: 4px 0; display: flex; gap: 8px; }
 .price-card ul li::before { content: ">"; color: var(--blue); }
-.price-card .btn { margin-top: auto; }
+.price-card .btn { width: 100%; justify-content: center; }
 
 .compare-wrap { overflow-x: auto; }
 .compare-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
@@ -278,10 +259,10 @@ footer {
     </a>
     <ul class="nav-links">
       <li><a href="#apps">Apps</a></li>
-      <li><a href="#features">AI</a></li>
+      <li><a href="#features">Features</a></li>
       <li><a href="#pricing">Pricing</a></li>
       <li><a href="#faq">FAQ</a></li>
-      <li><a href="https://github.com/nOS-Coding/nOffice" class="nav-cta">GitHub &rarr;</a></li>
+      <li><a href="https://github.com/nOS-Coding/nOffice" class="nav-cta">GitHub</a></li>
     </ul>
     <button class="mobile-toggle" onclick="document.querySelector('.mobile-menu').classList.toggle('open')" aria-label="Menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -290,17 +271,17 @@ footer {
 
   <div class="mobile-menu">
     <a href="#apps" onclick="document.querySelector('.mobile-menu').classList.remove('open')">Apps</a>
-    <a href="#features" onclick="document.querySelector('.mobile-menu').classList.remove('open')">AI</a>
+    <a href="#features" onclick="document.querySelector('.mobile-menu').classList.remove('open')">Features</a>
     <a href="#pricing" onclick="document.querySelector('.mobile-menu').classList.remove('open')">Pricing</a>
     <a href="#faq" onclick="document.querySelector('.mobile-menu').classList.remove('open')">FAQ</a>
   </div>
 
   <section class="hero reveal">
-    <div class="hero-badge"><span>v2026.7</span> &middot; Tauri 2.x &middot; macOS + Windows + Linux</div>
+    <div class="hero-badge"><span>v2026.7</span> &middot; macOS + Windows + Linux</div>
     <h1>Desktop Office Suite</h1>
-    <p>nOffice is a cross-platform desktop suite with five apps — nWrite, nSheet, nSlides, nImg, and nCode. No cloud, no telemetry. Everything runs fully offline on your own hardware.</p>
+    <p>Five native apps — word processor, spreadsheet, presentations, image editor, and code editor. All offline, all private. Subscribe once, use everything.</p>
     <div class="hero-buttons">
-      <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" class="btn btn-primary">Subscribe &mdash; $8/mo</a>
+      <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" class="btn btn-primary">Subscribe &mdash; from $8/mo</a>
       <a href="#apps" class="btn btn-outline">See the apps</a>
       <a href="https://github.com/nOS-Coding/nOffice/releases" class="btn btn-outline">Download</a>
     </div>
@@ -309,114 +290,62 @@ footer {
   <section class="section" id="apps">
     <div class="reveal">
       <div class="section-label">Apps</div>
-      <h2>Five tools, one suite</h2>
-      <p class="sub">Every app is a native Tauri window with its own AI sidebar. Launch from the nOffice shell, switch between them instantly.</p>
+      <h2>What you get</h2>
+      <p class="sub">Every app is a native desktop window, launched from the nOffice shell. Switch between them instantly, share content between apps.</p>
     </div>
 
     <div class="apps-grid">
-      <div class="app-card reveal"><div class="app-icon"><img src="icons/nwrite.png" alt="nWrite"></div><h4>nWrite</h4><p>Full-featured word processor with TipTap/ProseMirror. Tables, images, math, track changes, footnotes, comments. Export to PDF, DOCX, HTML. Inline AI rewrite, summarize, and generate.</p></div>
-      <div class="app-card reveal"><div class="app-icon"><img src="icons/nsheet.png" alt="nSheet"></div><h4>nSheet</h4><p>Spreadsheet with HyperFormula engine and PixiJS WebGL virtualized grid. 1M+ rows. Full chart suite (bar, line, pie, scatter, area, bubble). AI formula generation and data analysis.</p></div>
-      <div class="app-card reveal"><div class="app-icon"><img src="icons/nslides.png" alt="nSlides"></div><h4>nSlides</h4><p>Presentation tool with SVG + Canvas rendering. Full transitions including morph. Export to PDF and PPTX. AI slide generation and speaker note drafting.</p></div>
-      <div class="app-card reveal"><div class="app-icon"><img src="icons/nimg.png" alt="nImg"></div><h4>nImg</h4><p>Image editor with PixiJS WebGL canvas. Brush, eraser, shapes, text, clone stamp, gradient, blur. Full layer system. Generative AI via txt2img, img2img, inpainting, outpainting.</p></div>
-      <div class="app-card reveal"><div class="app-icon"><img src="icons/ncode.png" alt="nCode"></div><h4>nCode</h4><p>Multi-language IDE with Monaco Editor. Bundled LSP servers (pyright, clangd, rust-analyzer, gopls, solargraph). Git integration, multi-root workspaces. Ghost text, inline chat, explain, refactor.</p></div>
+      <div class="app-card reveal"><div class="app-icon"><img src="icons/nwrite.png" alt="nWrite"></div><h4>nWrite &mdash; Word Processor</h4><p>Write documents with tables, images, footnotes, and comments. Track changes, export to PDF or DOCX. Clean, distraction-free editing.</p></div>
+      <div class="app-card reveal"><div class="app-icon"><img src="icons/nsheet.png" alt="nSheet"></div><h4>nSheet &mdash; Spreadsheet</h4><p>Work with large datasets, build charts, run formulas. Supports millions of rows. Import and export CSV, XLSX, ODS.</p></div>
+      <div class="app-card reveal"><div class="app-icon"><img src="icons/nslides.png" alt="nSlides"></div><h4>nSlides &mdash; Presentations</h4><p>Create slide decks with transitions and animations. Export to PDF and PPTX. Present directly from the app.</p></div>
+      <div class="app-card reveal"><div class="app-icon"><img src="icons/nimg.png" alt="nImg"></div><h4>nImg &mdash; Image Editor</h4><p>Paint, edit, and composite images. Layers, brushes, shapes, filters. Open and save all common formats.</p></div>
+      <div class="app-card reveal"><div class="app-icon"><img src="icons/ncode.png" alt="nCode"></div><h4>nCode &mdash; Code Editor</h4><p>Full IDE with Monaco Editor. Syntax highlighting, Git integration, multi-language support. Built-in language servers for Python, C++, Rust, Go, Ruby.</p></div>
       <div class="app-card reveal">
         <div class="app-icon"><img src="icons/icon.png" alt="AI" style="border-radius:6px"></div>
-        <h4>Every app has AI</h4>
-        <p>Shared AI sidebar with 6 context modes: free chat, edit selection, explain, generate, summarize, translate. Local Qwen3 8B model. Fully offline inference.</p>
+        <h4>Built-in Assistant</h4>
+        <p>Every app includes an assistant that can answer questions, rewrite text, generate content, explain code, summarize documents, and translate between languages. Runs locally &mdash; no internet needed.</p>
       </div>
     </div>
   </section>
 
   <section class="section" id="features">
     <div class="reveal">
-      <div class="section-label">AI</div>
-      <h2>Local AI, built in</h2>
-      <p class="sub">No cloud dependency. No API keys. No data leaving your machine. The Rust backend manages a llama.cpp instance running Qwen3 8B GGUF (Q4_K_M) with 32K context window. Chat and embedding models run concurrently.</p>
+      <div class="section-label">Features</div>
+      <h2>Designed for local work</h2>
+      <p class="sub">No cloud, no telemetry, no account required. Your documents stay on your machine.</p>
     </div>
 
     <div class="features-grid">
-      <div class="feature-card reveal"><div class="feat-icon">&#9650;</div><div><h4>Qwen3 8B GGUF</h4><p>Q4_K_M quantized, 32K context window. GPU acceleration via Metal, CUDA, ROCm, or Vulkan. Model stored at ~/.noffice/models/, auto-downloaded on first launch from HuggingFace.</p></div></div>
-      <div class="feature-card reveal"><div class="feat-icon">&#9670;</div><div><h4>6 context modes</h4><p>Free chat, edit selection, explain, generate, summarize, translate. The AI sidebar streams responses via Tauri IPC events bridging the llama.cpp SSE stream.</p></div></div>
-      <div class="feature-card reveal"><div class="feat-icon">&#9724;</div><div><h4>Embedding pipeline</h4><p>Background tokio::mpsc queue processes document embeddings via a separate qwen3-embedding model. Per-document sled KV store for vector indices.</p></div></div>
-      <div class="feature-card reveal"><div class="feat-icon">&#9881;</div><div><h4>Stable Diffusion</h4><p>Auto1111 REST API integration at :7860. nImg supports txt2img, img2img, inpainting, outpainting. Rust probes port on launch, marks features as available or greyed-out.</p></div></div>
-      <div class="feature-card reveal"><div class="feat-icon">&#10005;</div><div><h4>Zero telemetry</h4><p>No analytics, no tracking, no prompt logging. The only network calls are the optional HuggingFace model download on first launch and periodic license check.</p></div></div>
-      <div class="feature-card reveal"><div class="feat-icon">&#128274;</div><div><h4>Fully offline</h4><p>Once the model is downloaded, everything works without internet. No cloud dependency of any kind. Your documents, your data, your machine.</p></div></div>
-    </div>
-
-    <div class="diagram reveal">
-<pre>
-<span class="hl">+----------------------------------------------------------------+</span>
-<span class="hl">|                        nOffice                                  |</span>
-<span class="hl">|       Launcher Shell  .  Tauri 2.x  .  Rust                    |</span>
-<span class="hl">+-------+-------+-------+-------+-------+------------------------+</span>
-<span class="hl">| nWrite| nSheet| nSlides| nImg | nCode |    AI Sidebar          |</span>
-<span class="hl">| TipTap| PixiJS|SVG+CV |PixiJS|Monaco |   6 modes              |</span>
-<span class="hl">+-------+-------+-------+-------+-------+------------------------+</span>
-<span class="hl">|              Rust Backend (single process)                      |</span>
-<span class="hl2">|  llama.cpp  .  Embedding Queue  .  LSP Proxy                   |</span>
-<span class="hl2">|  Sled KV    .  Config  .  Auto-save  .  Menus                   |</span>
-<span class="hl">+----------------------------------------------------------------+</span>
-</pre>
+      <div class="feature-card reveal"><div class="feat-icon">&#9670;</div><div><h4>All local</h4><p>Everything runs on your computer. No data is ever sent to a server. No internet connection required after initial setup.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#9724;</div><div><h4>Privacy first</h4><p>No analytics, no tracking, no telemetry. Your documents, your data, your machine.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#9650;</div><div><h4>Native performance</h4><p>Built with Tauri 2.x and Rust. Native windowing, GPU-accelerated rendering, minimal memory footprint.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#9881;</div><div><h4>Cross-platform</h4><p>Works on macOS, Windows, and Linux. Same experience everywhere. Native file dialogs, menus, and system integration.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#128274;</div><div><h4>Full format support</h4><p>Open and save industry-standard formats: DOCX, XLSX, PPTX, PDF, CSV, PNG, and more. Compatible with existing documents.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#10005;</div><div><h4>Auto-save & history</h4><p>Never lose work. Automatic saving with version history. Recover any previous version of your document.</p></div></div>
     </div>
   </section>
 
   <section class="section" id="pricing">
     <div class="reveal">
       <div class="section-label">Pricing</div>
-      <h2>$8/month, no tricks</h2>
-      <p class="sub">Single subscription covers all five apps and all AI features. 14-day full-feature trial. Periodic online check with grace period for offline use.</p>
+      <h2>One subscription, everything included</h2>
+      <p class="sub">Single license covers all five apps and all features. 14-day full-feature trial. Monthly or yearly billing &mdash; choose at checkout.</p>
     </div>
 
-    <div class="pricing-grid reveal">
+    <div class="reveal" style="display:flex;justify-content:center">
       <div class="price-card featured">
-        <h4>Monthly</h4>
+        <h4>nOffice</h4>
         <div class="price">$8</div>
-        <div class="price-sub">per month</div>
+        <div class="price-sub">per month or $85/year ($7.08/mo)</div>
         <ul>
           <li>All five apps</li>
-          <li>Local AI (all modes)</li>
+          <li>Built-in assistant</li>
           <li>All file formats</li>
           <li>Auto-save + version history</li>
+          <li>Cross-platform (macOS, Windows, Linux)</li>
           <li>14-day free trial</li>
         </ul>
-        <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" class="btn btn-primary">Start trial &rarr;</a>
-      </div>
-      <div class="price-card">
-        <h4>Yearly</h4>
-        <div class="price">$85</div>
-        <div class="price-sub">per year ($7.08/mo)</div>
-        <ul>
-          <li>Everything in Monthly</li>
-          <li>2 months free</li>
-          <li>Priority email support</li>
-          <li>Early access to updates</li>
-        </ul>
-        <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" class="btn btn-outline">Buy yearly &rarr;</a>
-      </div>
-    </div>
-
-    <div class="reveal" style="margin-top:24px">
-      <div class="section-label" style="color:var(--gray-500)">vs competition</div>
-      <div class="compare-wrap" style="margin-top:12px">
-        <table class="compare-table">
-          <thead>
-            <tr><th></th><th>nOffice</th><th>LibreOffice</th><th>Microsoft 365</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Price</td><td class="check">$8/mo or $85/yr</td><td class="check">Free</td><td class="check">$10/mo (Personal)</td></tr>
-            <tr><td>Word processor</td><td class="check">nWrite</td><td class="check">Writer</td><td class="check">Word</td></tr>
-            <tr><td>Spreadsheet</td><td class="check">nSheet</td><td class="check">Calc</td><td class="check">Excel</td></tr>
-            <tr><td>Presentations</td><td class="check">nSlides</td><td class="check">Impress</td><td class="check">PowerPoint</td></tr>
-            <tr><td>Image editor</td><td class="check">nImg</td><td class="cross">&mdash;</td><td class="cross">&mdash;</td></tr>
-            <tr><td>IDE</td><td class="check">nCode</td><td class="cross">&mdash;</td><td class="cross">&mdash;</td></tr>
-            <tr><td>Local AI</td><td class="check">Built-in (Qwen3 8B)</td><td class="cross">&mdash;</td><td class="partial">Copilot (cloud)</td></tr>
-            <tr><td>Offline</td><td class="check">Full</td><td class="check">Full</td><td class="cross">Partial</td></tr>
-            <tr><td>Open source</td><td class="cross">Proprietary</td><td class="check">Yes (LGPL/MPL)</td><td class="cross">No</td></tr>
-            <tr><td>Docx support</td><td class="check">Native</td><td class="check">Good</td><td class="check">Native</td></tr>
-            <tr><td>Real-time collab</td><td class="partial">LAN (v1)</td><td class="cross">Limited</td><td class="check">Cloud</td></tr>
-            <tr><td>AI privacy</td><td class="check">100% local</td><td class="cross">N/A</td><td class="cross">Cloud-based</td></tr>
-          </tbody>
-        </table>
+        <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" class="btn btn-primary">Start free trial &rarr;</a>
       </div>
     </div>
   </section>
@@ -425,7 +354,7 @@ footer {
     <div class="reveal">
       <div class="section-label">Downloads</div>
       <h2>Get nOffice</h2>
-      <p class="sub">Available for macOS ARM64/x64, Windows x64, and Linux x64 (AppImage + .deb). Subscribe first, then download.</p>
+      <p class="sub">Subscribe, then download for your platform. Updates are included.</p>
     </div>
     <div class="dl-grid reveal">
       <div class="dl-card">
@@ -435,7 +364,6 @@ footer {
           <li>Native .dmg</li>
           <li>macOS 14+</li>
           <li>Apple Silicon & Intel</li>
-          <li>Metal GPU acceleration</li>
         </ul>
         <a href="https://github.com/nOS-Coding/nOffice/releases" class="btn btn-secondary">Download for macOS</a>
       </div>
@@ -446,7 +374,6 @@ footer {
           <li>MSI installer</li>
           <li>Windows 10 22H2+</li>
           <li>Authenticode signed</li>
-          <li>Vulkan GPU acceleration</li>
         </ul>
         <a href="https://github.com/nOS-Coding/nOffice/releases" class="btn btn-secondary">Download for Windows</a>
       </div>
@@ -456,7 +383,6 @@ footer {
         <ul>
           <li>Cross-distro AppImage</li>
           <li>Debian/Ubuntu .deb</li>
-          <li>WebKitGTK + Vulkan</li>
           <li>Self-contained</li>
         </ul>
         <a href="https://github.com/nOS-Coding/nOffice/releases" class="btn btn-secondary">Download for Linux</a>
@@ -472,31 +398,27 @@ footer {
     <ul class="faq-list reveal">
       <li class="faq-item">
         <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Does nOffice require internet?</button>
-        <div class="faq-a">No. Everything runs fully offline once the AI model is downloaded. The only internet access is the optional HuggingFace model download on first launch and a periodic license check (with grace period for offline use). No telemetry, no analytics, no cloud dependency.</div>
-      </li>
-      <li class="faq-item">
-        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> What AI model does it use?</button>
-        <div class="faq-a">Qwen3 8B GGUF at Q4_K_M quantization with a 32K token context window. GPU acceleration via Metal (macOS), CUDA (NVIDIA), ROCm (AMD), or Vulkan (fallback). A separate qwen3-embedding model handles document embedding jobs. Models are stored at <code style="color:var(--gray-400)">~/.noffice/models/</code> and auto-downloaded from HuggingFace on first launch.</div>
+        <div class="faq-a">No. The apps run fully offline. The only time internet is needed is for the initial download and periodic license checks (with a grace period for offline use). Your documents never leave your machine.</div>
       </li>
       <li class="faq-item">
         <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> What are the system requirements?</button>
-        <div class="faq-a">8 GB RAM minimum, 8 GB free disk for models, macOS 14+, Windows 10 22H2+, Linux (AppImage). For AI features, a GPU with 6 GB+ VRAM is recommended but not required — the model runs on CPU too, just slower.</div>
+        <div class="faq-a">8 GB RAM minimum, macOS 14+, Windows 10 22H2+, or Linux (AppImage). No GPU required, though one helps for the assistant feature.</div>
       </li>
       <li class="faq-item">
         <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Is there a free trial?</button>
-        <div class="faq-a">Yes. 14-day full-feature trial with no credit card required. All five apps and all AI features are fully functional during the trial period. <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de">Start your trial here.</a></div>
+        <div class="faq-a">Yes. 14-day full-feature trial with no credit card required. All five apps are fully functional during the trial. <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de">Start your trial here.</a></div>
       </li>
       <li class="faq-item">
         <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Is nOffice open source?</button>
-        <div class="faq-a">No. nOffice is proprietary/closed source. The source code is not publicly available.</div>
+        <div class="faq-a">No. nOffice is proprietary software.</div>
       </li>
       <li class="faq-item">
-        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> How does nCode compare to VS Code?</button>
-        <div class="faq-a">nCode uses the same Monaco Editor that powers VS Code, so the editing experience is identical. It includes bundled LSP servers for Python, C/C++, Rust, Go, and Ruby. The key difference is the deeply integrated local AI — ghost text, inline chat, explain, refactor, and generate, all running on your local Qwen3 model instead of GitHub Copilot's cloud.</div>
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Can I share files with people who use Microsoft Office?</button>
+        <div class="faq-a">Yes. nOffice opens and saves all standard formats — DOCX, XLSX, PPTX, CSV, PDF, PNG, and more. Your files work seamlessly with other office suites.</div>
       </li>
       <li class="faq-item">
-        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Can nImg replace Photoshop / GIMP?</button>
-        <div class="faq-a">nImg is a capable image editor with full layer support, blending modes, and a comprehensive paint tool set. What sets it apart is generative AI — txt2img, img2img, inpainting, and outpainting via Stable Diffusion. It's not a 1:1 Photoshop replacement but offers unique AI capabilities that Photoshop only provides through cloud services.</div>
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> How is nCode different from VS Code?</button>
+        <div class="faq-a">nCode uses the same editor engine as VS Code (Monaco Editor), so the editing experience is nearly identical. It includes built-in language servers for Python, C++, Rust, Go, and Ruby — no extensions needed.</div>
       </li>
     </ul>
   </section>
@@ -507,13 +429,12 @@ footer {
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
       <a href="https://github.com/nOS-Coding/nOffice">GitHub</a>
-      <a href="https://github.com/nOS-Coding/nOffice/issues">Issues</a>
-      <a href="https://github.com/nOS-Coding/nOffice/releases">Releases</a>
+      <a href="https://github.com/nOS-Coding/nOffice/releases">Download</a>
     </div>
     <div class="legal">
       <span>&copy; 2026 nOffice</span>
-      <span>Powered by Tauri, llama.cpp, and Qwen</span>
-      <span>Subscribe: <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" style="color:var(--blue);text-decoration:none">Lemon Squeezy</a></span>
+      <span>Built with Tauri and Rust</span>
+      <span><a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" style="color:var(--blue);text-decoration:none">Subscribe on Lemon Squeezy</a></span>
     </div>
   </footer>
 

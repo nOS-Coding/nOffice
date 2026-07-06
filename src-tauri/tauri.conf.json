@@ -40,11 +40,15 @@
       "icons/icon.ico"
     ],
     "macOS": {
-      "minimumSystemVersion": "14.0"
+      "minimumSystemVersion": "14.0",
+      "signingIdentity": "-"
     },
     "windows": {
       "wix": {
         "language": "en-US"
+      },
+      "nsis": {
+        "installMode": "currentUser"
       }
     }
   },
