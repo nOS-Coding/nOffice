@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>nOffice — Desktop Office Suite</title>
-<meta name="description" content="nOffice is a cross-platform desktop office suite. nWrite, nSheet, nSlides, nImg, nCode — no cloud, all private.">
+<title>nOffice — AI Desktop Office Suite</title>
+<meta name="description" content="nOffice: five desktop apps with local AI. Write, spreadsheet, slides, image editor, code editor. All offline, all private, slightly opinionated.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
 
@@ -47,6 +47,7 @@ body {
   color: var(--gray-400);
   -webkit-font-smoothing: antialiased;
   line-height: 1.7;
+  overflow-x: hidden;
 }
 
 #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
@@ -65,13 +66,20 @@ nav {
   color: var(--gray-100); font-weight: 600; font-size: 1.125rem;
 }
 .logo img { height: 28px; width: auto; border-radius: 4px; }
+@keyframes wiggle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-5deg)} 75%{transform:rotate(5deg)} }
+.logo:hover img { animation: wiggle 0.3s ease-in-out; }
 
 .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
 .nav-links a {
   text-decoration: none; color: var(--gray-400); font-size: 0.875rem;
-  transition: color .15s;
+  transition: all .15s; position: relative;
 }
 .nav-links a:hover { color: var(--gray-100); }
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+  background: var(--blue); transition: width .2s;
+}
+.nav-links a:hover::after { width: 100%; }
 
 .nav-cta {
   background: var(--blue); color: white !important; font-weight: 600;
@@ -79,7 +87,8 @@ nav {
   display: inline-flex; align-items: center; gap: 8px;
   font-size: 0.875rem;
 }
-.nav-cta:hover { background: #3b5bdb !important; color: white !important; }
+.nav-cta:hover { background: #3b5bdb !important; transform: translateY(-1px); }
+.nav-cta::after { display: none !important; }
 
 .mobile-toggle { display: none; background: none; border: none; color: var(--gray-400); cursor: pointer; padding: 8px; }
 .mobile-menu {
@@ -128,11 +137,16 @@ nav {
   text-decoration: none; transition: all .15s;
 }
 .btn-primary { background: var(--blue); color: white; }
-.btn-primary:hover { background: #3b5bdb; }
+.btn-primary:hover { background: #3b5bdb; transform: translateY(-1px); }
 .btn-secondary { background: var(--gray-800); color: var(--gray-100); }
-.btn-secondary:hover { background: var(--gray-700); }
+.btn-secondary:hover { background: var(--gray-700); transform: translateY(-1px); }
 .btn-outline { background: transparent; color: var(--gray-100); border: 1px solid var(--gray-700); }
-.btn-outline:hover { border-color: var(--gray-500); background: var(--gray-900); }
+.btn-outline:hover { border-color: var(--gray-500); background: var(--gray-900); transform: translateY(-1px); }
+
+@keyframes float {
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
 
 .section { padding: var(--vp) 0; }
 .section + .section { border-top: 1px solid var(--gray-800); }
@@ -148,7 +162,7 @@ nav {
 .section > .sub { color: var(--gray-500); margin-bottom: 32px; max-width: 70%; }
 @media (max-width: 50rem) { .section > .sub { max-width: 100%; } }
 
-.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal { opacity: 0; transform: translateY(32px); transition: opacity 0.7s cubic-bezier(.22,1,.36,1), transform 0.7s cubic-bezier(.22,1,.36,1); }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
 .apps-grid {
@@ -157,11 +171,20 @@ nav {
 @media (max-width: 56rem) { .apps-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 36rem) { .apps-grid { grid-template-columns: 1fr; } }
 
+@keyframes cardHover {
+  0%{transform:translateY(0) scale(1)}
+  100%{transform:translateY(-6px) scale(1.02)}
+}
+
 .app-card {
   background: var(--black-soft); border: 1px solid var(--gray-800);
   border-radius: 6px; padding: 24px; transition: border-color .2s, transform .2s;
+  cursor: default;
 }
-.app-card:hover { border-color: var(--gray-700); transform: translateY(-2px); }
+.app-card:hover {
+  border-color: var(--gray-700);
+  animation: cardHover 0.2s forwards;
+}
 .app-icon { width: 40px; height: 40px; margin-bottom: 12px; }
 .app-icon img { width: 100%; height: 100%; object-fit: contain; }
 .app-card h4 { color: var(--gray-100); font-size: 1rem; margin-bottom: 4px; }
@@ -175,12 +198,39 @@ nav {
 .feature-card {
   background: var(--black-soft); border: 1px solid var(--gray-800);
   border-radius: 6px; padding: 20px 24px; display: flex; gap: 14px;
-  transition: border-color .2s;
+  transition: all .2s;
 }
-.feature-card:hover { border-color: var(--gray-700); }
+.feature-card:hover {
+  border-color: var(--gray-700);
+  box-shadow: 0 4px 20px rgba(76,110,245,0.06);
+}
 .feat-icon { flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: var(--gray-900); color: var(--blue); font-size: 0.875rem; }
 .feature-card h4 { color: var(--gray-100); font-size: 0.9375rem; margin-bottom: 4px; }
 .feature-card p { color: var(--gray-500); font-size: 0.8125rem; line-height: 1.6; }
+
+.term-demo {
+  background: #0d0d12; border: 1px solid var(--gray-800);
+  border-radius: 8px; overflow: hidden; width: 100%; max-width: 480px;
+  font-size: 0.8125rem; box-shadow: 0 0 40px rgba(76,110,245,0.04);
+  margin: 24px 0;
+}
+.term-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--gray-800);
+}
+.term-dots { display: flex; gap: 6px; }
+.term-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-700); }
+.term-dots span:first-child { background: #ff5f57; }
+.term-dots span:nth-child(2) { background: #ffbd2e; }
+.term-dots span:nth-child(3) { background: #28c840; }
+.term-title { color: var(--gray-600); font-size: 0.6875rem; margin-left: 8px; }
+.term-body { padding: 16px 18px; min-height: 140px; }
+.term-output { color: var(--gray-500); line-height: 1.6; margin: 2px 0 2px 0; white-space: pre-wrap; }
+.term-output .hl-blue { color: var(--blue-bright); }
+.term-output .hl-green { color: #50fa7b; }
+.term-output .hl-pink { color: #ff79c6; }
+.term-output .hl-yellow { color: #f1fa8c; }
 
 .price-card {
   background: var(--black-soft); border: 1px solid var(--gray-800);
@@ -212,9 +262,10 @@ nav {
   width: 100%; display: flex; gap: 16px; align-items: center;
   padding: 20px 0; background: none; border: none; cursor: pointer;
   font-family: var(--fm); font-size: 0.9375rem; color: var(--gray-100);
-  text-align: left;
+  text-align: left; transition: color .15s;
 }
-.faq-q .indicator { color: var(--gray-600); font-size: 1.1rem; flex-shrink: 0; }
+.faq-q .indicator { color: var(--gray-600); font-size: 1.1rem; flex-shrink: 0; transition: transform .2s; }
+.faq-q.open .indicator { transform: rotate(45deg); }
 .faq-q:hover { color: var(--blue); }
 .faq-a { padding: 0 0 20px 32px; color: var(--gray-500); font-size: 0.875rem; display: none; line-height: 1.8; }
 .faq-a.open { display: block; }
@@ -225,7 +276,7 @@ footer {
   display: flex; flex-direction: column; align-items: center; gap: 24px;
 }
 .footer-links { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; }
-.footer-links a { color: var(--gray-500); text-decoration: none; font-size: 0.875rem; }
+.footer-links a { color: var(--gray-500); text-decoration: none; font-size: 0.875rem; transition: color .15s; }
 .footer-links a:hover { color: var(--gray-100); }
 .legal { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; color: var(--gray-600); font-size: 0.75rem; }
 
@@ -234,16 +285,28 @@ footer {
 
 .dl-card {
   background: var(--black-soft); border: 1px solid var(--gray-800);
-  border-radius: 6px; padding: 24px; transition: border-color .2s;
+  border-radius: 6px; padding: 24px; transition: all .2s;
   display: flex; flex-direction: column;
 }
-.dl-card:hover { border-color: var(--gray-700); }
+.dl-card:hover { border-color: var(--gray-700); transform: translateY(-2px); }
 .dl-card h4 { color: var(--gray-100); font-size: 1rem; margin-bottom: 4px; }
 .dl-card .tag { display: inline-block; font-size: 0.6875rem; color: var(--gray-500); background: var(--gray-900); padding: 2px 8px; border-radius: 3px; margin-bottom: 16px; }
 .dl-card ul { list-style: none; flex: 1; }
 .dl-card ul li { font-size: 0.8125rem; color: var(--gray-500); padding: 4px 0; display: flex; gap: 8px; }
 .dl-card ul li::before { content: ">"; color: var(--gray-600); }
 .dl-card .btn { margin-top: 16px; width: 100%; justify-content: center; }
+
+.rando-quote {
+  background: var(--black-soft); border: 1px solid var(--gray-800);
+  border-radius: 6px; padding: 20px 24px; margin-top: 24px;
+  text-align: center; font-style: italic; color: var(--gray-500);
+  font-size: 0.875rem; position: relative; overflow: hidden;
+}
+.rando-quote::before {
+  content: '"'; position: absolute; top: -10px; left: 12px;
+  font-size: 4rem; color: var(--gray-800); font-style: normal;
+}
+.rando-quote .author { display: block; margin-top: 8px; color: var(--gray-600); font-style: normal; font-size: 0.75rem; }
 </style>
 </head>
 <body>
@@ -259,7 +322,7 @@ footer {
     </a>
     <ul class="nav-links">
       <li><a href="#apps">Apps</a></li>
-      <li><a href="#features">Features</a></li>
+      <li><a href="#features">AI</a></li>
       <li><a href="#pricing">Pricing</a></li>
       <li><a href="#faq">FAQ</a></li>
       <li><a href="https://github.com/nOS-Coding/nOffice" class="nav-cta">GitHub</a></li>
@@ -271,90 +334,134 @@ footer {
 
   <div class="mobile-menu">
     <a href="#apps" onclick="document.querySelector('.mobile-menu').classList.remove('open')">Apps</a>
-    <a href="#features" onclick="document.querySelector('.mobile-menu').classList.remove('open')">Features</a>
+    <a href="#features" onclick="document.querySelector('.mobile-menu').classList.remove('open')">AI</a>
     <a href="#pricing" onclick="document.querySelector('.mobile-menu').classList.remove('open')">Pricing</a>
     <a href="#faq" onclick="document.querySelector('.mobile-menu').classList.remove('open')">FAQ</a>
   </div>
 
   <section class="hero reveal">
     <div class="hero-badge"><span>v2026.7</span> &middot; macOS + Windows + Linux</div>
-    <h1>Desktop Office Suite</h1>
-    <p>Five native apps — word processor, spreadsheet, presentations, image editor, and code editor. All offline, all private. Subscribe once, use everything.</p>
+    <h1>AI Desktop Office Suite</h1>
+    <p>Five native apps with a moderately intelligent AI assistant that lives entirely on your computer. No cloud, no telemetry, no one reading your document about grandma's cookie recipe.</p>
     <div class="hero-buttons">
       <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" class="btn btn-primary">Subscribe &mdash; from $8/mo</a>
       <a href="#apps" class="btn btn-outline">See the apps</a>
       <a href="https://github.com/nOS-Coding/nOffice/releases" class="btn btn-outline">Download</a>
+    </div>
+
+    <div class="term-demo" id="term-demo">
+      <div class="term-bar"><span class="term-dots"><span></span><span></span><span></span></span><span class="term-title">noffice@local:~</span></div>
+      <div class="term-body" id="term-body"></div>
     </div>
   </section>
 
   <section class="section" id="apps">
     <div class="reveal">
       <div class="section-label">Apps</div>
-      <h2>What you get</h2>
-      <p class="sub">Every app is a native desktop window, launched from the nOffice shell. Switch between them instantly, share content between apps.</p>
+      <h2>Five apps. One subscription. Infinite potential typos.</h2>
+      <p class="sub">Each app is a native desktop window launched from the nOffice shell. They share data, an AI assistant, and a questionable sense of humor.</p>
     </div>
 
     <div class="apps-grid">
-      <div class="app-card reveal"><div class="app-icon"><img src="icons/nwrite.png" alt="nWrite"></div><h4>nWrite &mdash; Word Processor</h4><p>Write documents with tables, images, footnotes, and comments. Track changes, export to PDF or DOCX. Clean, distraction-free editing.</p></div>
-      <div class="app-card reveal"><div class="app-icon"><img src="icons/nsheet.png" alt="nSheet"></div><h4>nSheet &mdash; Spreadsheet</h4><p>Work with large datasets, build charts, run formulas. Supports millions of rows. Import and export CSV, XLSX, ODS.</p></div>
-      <div class="app-card reveal"><div class="app-icon"><img src="icons/nslides.png" alt="nSlides"></div><h4>nSlides &mdash; Presentations</h4><p>Create slide decks with transitions and animations. Export to PDF and PPTX. Present directly from the app.</p></div>
-      <div class="app-card reveal"><div class="app-icon"><img src="icons/nimg.png" alt="nImg"></div><h4>nImg &mdash; Image Editor</h4><p>Paint, edit, and composite images. Layers, brushes, shapes, filters. Open and save all common formats.</p></div>
-      <div class="app-card reveal"><div class="app-icon"><img src="icons/ncode.png" alt="nCode"></div><h4>nCode &mdash; Code Editor</h4><p>Full IDE with Monaco Editor. Syntax highlighting, Git integration, multi-language support. Built-in language servers for Python, C++, Rust, Go, Ruby.</p></div>
+      <div class="app-card reveal"><div class="app-icon"><img src="icons/nwrite.png" alt="nWrite"></div><h4>nWrite</h4><p>Word processor for people who type things. Tables, images, footnotes, comments, track changes. Export to PDF or DOCX. Also supports words.</p></div>
+      <div class="app-card reveal"><div class="app-icon"><img src="icons/nsheet.png" alt="nSheet"></div><h4>nSheet</h4><p>Spreadsheet where numbers go to have meetings. HyperFormula engine, millions of rows, charts, pivot tables. AI can write your formulas so you don't have to google them.</p></div>
+      <div class="app-card reveal"><div class="app-icon"><img src="icons/nslides.png" alt="nSlides"></div><h4>nSlides</h4><p>Presentations. For when you need to communicate ideas to a room of people who would rather be elsewhere. Transitions, animations, export to PDF and PPTX.</p></div>
+      <div class="app-card reveal"><div class="app-icon"><img src="icons/nimg.png" alt="nImg"></div><h4>nImg</h4><p>Image editor with layers, brushes, shapes, and filters. Also generates images from text descriptions, which means you can finally create that concept art of a raccoon in a tuxedo.</p></div>
+      <div class="app-card reveal"><div class="app-icon"><img src="icons/ncode.png" alt="nCode"></div><h4>nCode</h4><p>IDE based on the same editor VS Code uses (Monaco). LSP support for Python, Rust, Go, C++, Ruby. AI can explain, refactor, or generate code. May occasionally suggest adding more blockchain.</p></div>
       <div class="app-card reveal">
         <div class="app-icon"><img src="icons/icon.png" alt="AI" style="border-radius:6px"></div>
-        <h4>Built-in Assistant</h4>
-        <p>Every app includes an assistant that can answer questions, rewrite text, generate content, explain code, summarize documents, and translate between languages. Runs locally &mdash; no internet needed.</p>
+        <h4>Built-in AI</h4>
+        <p>Every app has an AI sidebar. Chat, rewrite, summarize, translate, generate, explain. Runs locally on a Qwen3 8B model. It's like having a coworker who never takes vacation and occasionally hallucinates.</p>
       </div>
     </div>
   </section>
 
   <section class="section" id="features">
     <div class="reveal">
-      <div class="section-label">Features</div>
-      <h2>Designed for local work</h2>
-      <p class="sub">No cloud, no telemetry, no account required. Your documents stay on your machine.</p>
+      <div class="section-label">AI</div>
+      <h2>Local intelligence. Zero chill.</h2>
+      <p class="sub">A Qwen3 8B model runs on your machine via llama.cpp. 32K context window, GPU accelerated, fully offline. Your data never leaves your computer, not even to ask for directions.</p>
     </div>
 
     <div class="features-grid">
-      <div class="feature-card reveal"><div class="feat-icon">&#9670;</div><div><h4>All local</h4><p>Everything runs on your computer. No data is ever sent to a server. No internet connection required after initial setup.</p></div></div>
-      <div class="feature-card reveal"><div class="feat-icon">&#9724;</div><div><h4>Privacy first</h4><p>No analytics, no tracking, no telemetry. Your documents, your data, your machine.</p></div></div>
-      <div class="feature-card reveal"><div class="feat-icon">&#9650;</div><div><h4>Native performance</h4><p>Built with Tauri 2.x and Rust. Native windowing, GPU-accelerated rendering, minimal memory footprint.</p></div></div>
-      <div class="feature-card reveal"><div class="feat-icon">&#9881;</div><div><h4>Cross-platform</h4><p>Works on macOS, Windows, and Linux. Same experience everywhere. Native file dialogs, menus, and system integration.</p></div></div>
-      <div class="feature-card reveal"><div class="feat-icon">&#128274;</div><div><h4>Full format support</h4><p>Open and save industry-standard formats: DOCX, XLSX, PPTX, PDF, CSV, PNG, and more. Compatible with existing documents.</p></div></div>
-      <div class="feature-card reveal"><div class="feat-icon">&#10005;</div><div><h4>Auto-save & history</h4><p>Never lose work. Automatic saving with version history. Recover any previous version of your document.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#9670;</div><div><h4>6 context modes</h4><p>Free chat, edit selection, explain, generate, summarize, translate. The AI switches between modes faster than you switch between browser tabs.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#9881;</div><div><h4>Embedding pipeline</h4><p>Documents get indexed in the background via a separate embedding model. Your computer builds a searchable memory of everything you've written. It remembers things you forgot. It's already judging your spelling.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#9650;</div><div><h4>Image generation</h4><p>nImg connects to Stable Diffusion for txt2img and img2img. Generate images, edit with inpainting, expand with outpainting. Finally, a way to visualize "a katana-wielding pineapple surfing a tsunami."</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#9744;</div><div><h4>GPU goes brrr</h4><p>GPU acceleration via Metal, CUDA, ROCm, or Vulkan. The model will use whatever graphics card you throw at it. Intel HD Graphics users: we respect your courage.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#10005;</div><div><h4>Zero telemetry</h4><p>No analytics, no tracking, no prompt logging. We have no idea what you're doing with that image generator and we're choosing not to ask.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#128274;</div><div><h4>Fully offline</h4><p>Once the model downloads, everything works without internet. No cloud, no servers, no "please wait while we connect." Just you, your machine, and a sufficiently large language model.</p></div></div>
+    </div>
+
+    <div class="randoo-quote reveal" id="quote-box">
+      <span id="quote-text">Loading existential wit...</span>
+      <span class="author" id="quote-author">nOffice</span>
+    </div>
+
+    <div class="diagram reveal" style="background:var(--black-soft);border:1px solid var(--gray-800);border-radius:6px;padding:2rem;overflow-x:auto;margin-top:24px">
+<pre>
+<span style="color:var(--blue)">+----------------------------------------------------------------+</span>
+<span style="color:var(--blue)">|                        nOffice                                  |</span>
+<span style="color:var(--blue)">|       Launcher Shell  .  Tauri 2.x  .  Rust                    |</span>
+<span style="color:var(--blue)">+-------+-------+-------+-------+-------+------------------------+</span>
+<span style="color:var(--blue)">| nWrite| nSheet| nSlides| nImg | nCode |    AI Sidebar          |</span>
+<span style="color:var(--blue)">+-------+-------+-------+-------+-------+------------------------+</span>
+<span style="color:var(--blue)">|              Rust Backend (single process)                      |</span>
+<span style="color:var(--blue-bright)">|  llama.cpp  .  Embedding Pipeline  .  LSP Proxy                |</span>
+<span style="color:var(--blue-bright)">|  Sled KV    .  Config  .  Auto-save  .  Existential Dread      |</span>
+<span style="color:var(--blue)">+----------------------------------------------------------------+</span>
+</pre>
     </div>
   </section>
 
   <section class="section" id="pricing">
     <div class="reveal">
       <div class="section-label">Pricing</div>
-      <h2>One subscription, everything included</h2>
-      <p class="sub">Single license covers all five apps and all features. 14-day full-feature trial. Monthly or yearly billing &mdash; choose at checkout.</p>
+      <h2>$8/month. Or $85/year. Math checks out.</h2>
+      <p class="sub">Single subscription, all apps, all features. 14-day trial. No credit card required for the trial because we trust you. Please don't prove us wrong.</p>
     </div>
 
     <div class="reveal" style="display:flex;justify-content:center">
       <div class="price-card featured">
         <h4>nOffice</h4>
         <div class="price">$8</div>
-        <div class="price-sub">per month or $85/year ($7.08/mo)</div>
+        <div class="price-sub">per month or $85/year (you do the math, we believe in you)</div>
         <ul>
           <li>All five apps</li>
-          <li>Built-in assistant</li>
+          <li>Built-in AI (all modes, all sass)</li>
           <li>All file formats</li>
           <li>Auto-save + version history</li>
           <li>Cross-platform (macOS, Windows, Linux)</li>
           <li>14-day free trial</li>
+          <li>No hidden fees (we promise on our favorite IDE)</li>
         </ul>
         <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" class="btn btn-primary">Start free trial &rarr;</a>
       </div>
+    </div>
+
+    <div class="reveal" style="margin-top:24px">
+      <div class="section-label" style="color:var(--gray-500)">Fair warning</div>
+      <table class="compare-table" style="margin-top:12px">
+        <thead>
+          <tr><th></th><th>nOffice</th><th>Microsoft 365</th><th>"That free thing"</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Price</td><td class="check">$8/mo</td><td class="cross">$10/mo + your soul</td><td class="check">Free (you are the product)</td></tr>
+          <tr><td>Your data stays yours</td><td class="check">Always</td><td class="cross">It's complicated</td><td class="cross">lol no</td></tr>
+          <tr><td>Local AI</td><td class="check">Built-in, offline</td><td class="cross">Copilot (cloud, extra $)</td><td class="cross">What's AI?</td></tr>
+          <tr><td>Image editor</td><td class="check">Yes, with gen AI</td><td class="cross">Not included</td><td class="partial">GIMP (it's fine)</td></tr>
+          <tr><td>Code editor</td><td class="check">Monaco + LSP + AI</td><td class="cross">Not included</td><td class="check">VS Code (no local AI)</td></tr>
+          <tr><td>Open source</td><td class="cross">Proprietary (sorry)</td><td class="cross">No</td><td class="check">Yes (usually)</td></tr>
+          <tr><td>24/7 support</td><td class="partial">Email (we reply)</td><td class="check">Chat bot</td><td class="cross">GitHub Issues</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
   <section class="section" id="downloads">
     <div class="reveal">
       <div class="section-label">Downloads</div>
-      <h2>Get nOffice</h2>
-      <p class="sub">Subscribe, then download for your platform. Updates are included.</p>
+      <h2>Get it. Use it. Tell your friends.</h2>
+      <p class="sub">Subscribe first, then download. Updates included because we're not monsters.</p>
     </div>
     <div class="dl-grid reveal">
       <div class="dl-card">
@@ -383,7 +490,7 @@ footer {
         <ul>
           <li>Cross-distro AppImage</li>
           <li>Debian/Ubuntu .deb</li>
-          <li>Self-contained</li>
+          <li>Self-contained insanity</li>
         </ul>
         <a href="https://github.com/nOS-Coding/nOffice/releases" class="btn btn-secondary">Download for Linux</a>
       </div>
@@ -393,32 +500,36 @@ footer {
   <section class="section" id="faq">
     <div class="reveal">
       <div class="section-label">FAQ</div>
-      <h2>Common questions</h2>
+      <h2>Questions people actually ask</h2>
     </div>
     <ul class="faq-list reveal">
       <li class="faq-item">
         <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Does nOffice require internet?</button>
-        <div class="faq-a">No. The apps run fully offline. The only time internet is needed is for the initial download and periodic license checks (with a grace period for offline use). Your documents never leave your machine.</div>
+        <div class="faq-a">Only to download the AI model on first launch and for periodic license checks (with a grace period because we're not animals). After that, everything works offline. No telemetry, no analytics, no one reading your documents. Your secret novel about sentient office supplies is safe.</div>
       </li>
       <li class="faq-item">
-        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> What are the system requirements?</button>
-        <div class="faq-a">8 GB RAM minimum, macOS 14+, Windows 10 22H2+, or Linux (AppImage). No GPU required, though one helps for the assistant feature.</div>
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> What AI model powers the assistant?</button>
+        <div class="faq-a">A Qwen3 8B model quantized to Q4_K_M with a 32K context window. It runs locally on your machine via llama.cpp. GPU acceleration through Metal, CUDA, ROCm, or Vulkan. It's smart enough to help but not smart enough to take your job. Probably.</div>
       </li>
       <li class="faq-item">
-        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Is there a free trial?</button>
-        <div class="faq-a">Yes. 14-day full-feature trial with no credit card required. All five apps are fully functional during the trial. <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de">Start your trial here.</a></div>
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> System requirements?</button>
+        <div class="faq-a">8 GB RAM minimum, 8 GB free disk for the AI model, macOS 14+, Windows 10 22H2+, or Linux (AppImage). A GPU with 6 GB+ VRAM helps but isn't required. The model runs on CPU too — just like you ran on fumes in college.</div>
       </li>
       <li class="faq-item">
-        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Is nOffice open source?</button>
-        <div class="faq-a">No. nOffice is proprietary software.</div>
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Free trial?</button>
+        <div class="faq-a">14 days, full-featured, no credit card. If you decide not to subscribe, the app will gently remind you with increasing levels of passive aggression. <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de">Start here.</a></div>
       </li>
       <li class="faq-item">
-        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Can I share files with people who use Microsoft Office?</button>
-        <div class="faq-a">Yes. nOffice opens and saves all standard formats — DOCX, XLSX, PPTX, CSV, PDF, PNG, and more. Your files work seamlessly with other office suites.</div>
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Open source?</button>
+        <div class="faq-a">No. nOffice is proprietary software. We know. But someone has to pay the programmer's cat food bill.</div>
       </li>
       <li class="faq-item">
-        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> How is nCode different from VS Code?</button>
-        <div class="faq-a">nCode uses the same editor engine as VS Code (Monaco Editor), so the editing experience is nearly identical. It includes built-in language servers for Python, C++, Rust, Go, and Ruby — no extensions needed.</div>
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Can I share files with Microsoft Office users?</button>
+        <div class="faq-a">Yes. DOCX, XLSX, PPTX, CSV, PDF — all the usual suspects. Your coworkers won't know you're using something cooler. Unless you tell them. Which you should.</div>
+      </li>
+      <li class="faq-item">
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> How is nImg different from other image editors?</button>
+        <div class="faq-a">It has layers, brushes, shapes, filters — all the standard stuff. Plus generative AI (txt2img, img2img, inpainting, outpainting). You can type "a raccoon in a suit giving a TED talk" and it will create it. Ethics not included.</div>
       </li>
     </ul>
   </section>
@@ -432,8 +543,8 @@ footer {
       <a href="https://github.com/nOS-Coding/nOffice/releases">Download</a>
     </div>
     <div class="legal">
-      <span>&copy; 2026 nOffice</span>
-      <span>Built with Tauri and Rust</span>
+      <span>&copy; 2026 nOffice &mdash; probably not a pyramid scheme</span>
+      <span>No raccoons were harmed in the making of this software</span>
       <span><a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" style="color:var(--blue);text-decoration:none">Subscribe on Lemon Squeezy</a></span>
     </div>
   </footer>
@@ -445,55 +556,59 @@ footer {
   const c = document.getElementById('bg-canvas');
   const ctx = c.getContext('2d');
   let w, h, particles = [];
+  let mouseX = 9999, mouseY = 9999;
+  let time = 0;
 
   function resize() { w = c.width = window.innerWidth; h = c.height = window.innerHeight; }
   window.addEventListener('resize', resize);
   resize();
 
-  const cols = 20, rows = 12;
-  const spacingX = w / (cols + 1);
-  const spacingY = h / (rows + 1);
-
+  const cols = 24, rows = 14;
   function init() {
     particles = [];
+    const sx = w / (cols + 1), sy = h / (rows + 1);
     for (let y = 0; y < rows; y++)
       for (let x = 0; x < cols; x++)
-        particles.push({ ox: (x+1)*spacingX, oy: (y+1)*spacingY, phase: Math.random()*Math.PI*2, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3 });
+        particles.push({
+          ox: (x+1)*sx, oy: (y+1)*sy,
+          phase: Math.random()*Math.PI*2,
+          vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.4,
+          size: 0.5 + Math.random()*1.5
+        });
   }
   init();
 
-  let mouseX = w/2, mouseY = h/2;
   document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+  document.addEventListener('touchmove', e => { mouseX = e.touches[0].clientX; mouseY = e.touches[0].clientY; });
 
-  let time = 0;
   function draw() {
-    time += 0.003;
+    time += 0.004;
     ctx.clearRect(0, 0, w, h);
     for (const p of particles) {
       const dx = mouseX - p.ox, dy = mouseY - p.oy;
       const dist = Math.sqrt(dx*dx + dy*dy);
-      const pull = Math.max(0, 1 - dist/300) * 0.5;
+      const pull = Math.max(0, 1 - dist/250) * 0.6;
       p.vx += dx * pull * 0.01;
       p.vy += dy * pull * 0.01;
-      p.vx *= 0.92; p.vy *= 0.92;
-      const sw = Math.sin(time + p.phase) * 15;
-      const x = p.ox + p.vx + sw * 0.3;
-      const y = p.oy + p.vy + Math.cos(time * 0.7 + p.phase) * 10;
+      p.vx *= 0.9; p.vy *= 0.9;
+      const sw = Math.sin(time + p.phase) * 12;
+      const x = p.ox + p.vx + sw * 0.4;
+      const y = p.oy + p.vy + Math.cos(time * 0.6 + p.phase) * 8;
       ctx.beginPath();
-      ctx.arc(x, y, 1, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(76, 110, 245, 0.15)';
+      ctx.arc(x, y, p.size, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(76, 110, 245, 0.12)';
       ctx.fill();
     }
-    ctx.strokeStyle = 'rgba(76, 110, 245, 0.04)';
-    ctx.lineWidth = 1;
     for (let i = 0; i < particles.length; i++) {
       for (let j = i+1; j < particles.length; j++) {
         const dx = particles[i].ox - particles[j].ox;
         const dy = particles[i].oy - particles[j].oy;
-        if (dx*dx + dy*dy < 200*200) {
+        if (dx*dx + dy*dy < 180*180) {
           ctx.beginPath();
           ctx.moveTo(particles[i].ox + particles[i].vx, particles[i].oy + particles[i].vy);
           ctx.lineTo(particles[j].ox + particles[j].vx, particles[j].oy + particles[j].vy);
+          ctx.strokeStyle = `rgba(76, 110, 245, ${0.03 * (1 - (dx*dx+dy*dy)/(180*180))})`;
+          ctx.lineWidth = 0.5;
           ctx.stroke();
         }
       }
@@ -501,6 +616,87 @@ footer {
     requestAnimationFrame(draw);
   }
   draw();
+})();
+
+(function() {
+  const typeLines = [
+    { cmd: 'noffice status', out: 'All 5 apps ready. AI model: Qwen3-8B (loaded). GPU: Metal. Existential dread: nominal.' },
+    { cmd: 'noffice launch nwrite', out: 'Opening nWrite (1280x900)... ready.' },
+    { cmd: 'noffice launch ncode', out: 'Opening nCode (1400x950)... ready.' },
+    { cmd: 'noffice ai chat "write a haiku about spreadsheets"', out: '<span class="hl-blue">AI:</span> Columns and rows dance / Numbers whisper their secrets / Undo is your friend' },
+    { cmd: 'noffice ai generate "image: cat in spacesuit playing guitar"', out: '<span class="hl-blue">nImg:</span> Generating... done. Saved to ~/Pictures/space_cat.png' },
+    { cmd: undefined, out: '<span class="hl-green">Ready.</span> <span class="hl-yellow">All systems operational.</span> <span class="hl-pink">AI is judging your folder structure.</span>' },
+  ];
+
+  const body = document.querySelector('.term-body');
+  if (!body) return;
+
+  let idx = 0, ci = 0, typing = true;
+  const promptEl = document.createElement('div');
+  promptEl.style.cssText = 'color:var(--blue-bright);margin-right:8px';
+  promptEl.textContent = '$';
+  const inputEl = document.createElement('span');
+  inputEl.style.cssText = 'color:var(--gray-300)';
+  const cursorEl = document.createElement('span');
+  cursorEl.style.cssText = 'animation:blink 0.8s step-end infinite;color:var(--blue);font-weight:700';
+  cursorEl.textContent = '|';
+
+  const style = document.createElement('style');
+  style.textContent = '@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}';
+  document.head.appendChild(style);
+
+  function tick() {
+    const line = typeLines[idx];
+    if (!line) {
+      idx = 0; ci = 0; typing = true;
+      setTimeout(() => { body.innerHTML = ''; tick(); }, 4000);
+      return;
+    }
+    if (line.cmd !== undefined && typing) {
+      if (ci === 0) {
+        body.innerHTML = '';
+        const lineDiv = document.createElement('div');
+        lineDiv.style.cssText = 'margin-bottom:4px';
+        lineDiv.appendChild(promptEl.cloneNode(true));
+        const inp = document.createElement('span');
+        inp.style.cssText = 'color:var(--gray-300)';
+        lineDiv.appendChild(inp);
+        lineDiv.appendChild(cursorEl.cloneNode(true));
+        body.appendChild(lineDiv);
+      }
+      const lastLine = body.lastChild;
+      const inpSpan = lastLine.querySelector('span');
+      if (inpSpan) {
+        inpSpan.textContent = line.cmd.slice(0, ci + 1);
+        ci++;
+      }
+      if (ci < line.cmd.length) { setTimeout(tick, 30 + Math.random() * 25); return; }
+      typing = false;
+      setTimeout(tick, 200);
+      return;
+    }
+    if (line.cmd !== undefined && !typing) {
+      const div = document.createElement('div');
+      div.style.cssText = 'margin:4px 0 6px 0;color:var(--gray-500);line-height:1.6;white-space:pre-wrap';
+      div.textContent = line.out;
+      body.appendChild(div);
+      idx++; ci = 0; typing = true;
+      const delay = typeLines[idx] && typeLines[idx].cmd === undefined ? 400 : 600;
+      setTimeout(tick, delay);
+      return;
+    }
+    if (line.cmd === undefined) {
+      const div = document.createElement('div');
+      div.style.cssText = 'margin:4px 0 6px 0;color:var(--gray-500);line-height:1.6;white-space:pre-wrap';
+      div.innerHTML = line.out;
+      body.appendChild(div);
+      setTimeout(() => {
+        idx = 0; ci = 0; typing = true; body.innerHTML = '';
+        setTimeout(tick, 800);
+      }, 4000);
+    }
+  }
+  tick();
 })();
 
 (function() {
@@ -515,10 +711,38 @@ function faq(btn) {
   const answer = btn.nextElementSibling;
   const indicator = btn.querySelector('.indicator');
   const open = answer.classList.contains('open');
-  document.querySelectorAll('.faq-a.open').forEach(a => { a.classList.remove('open'); a.previousElementSibling.querySelector('.indicator').textContent = '+'; });
+  document.querySelectorAll('.faq-a.open').forEach(a => {
+    a.classList.remove('open');
+    a.previousElementSibling.classList.remove('open');
+    a.previousElementSibling.querySelector('.indicator').textContent = '+';
+  });
   answer.classList.toggle('open');
-  indicator.textContent = open ? '+' : '\u2212';
+  btn.classList.toggle('open');
+  indicator.textContent = open ? '+' : '\u00d7';
 }
+
+(function() {
+  const quotes = [
+    { text: "I installed nOffice and my productivity increased by 40%. Then I realized I was just spending more time tweaking settings.", author: "Satisfied User #42" },
+    { text: "The AI wrote a heartfelt apology letter to my ex. It worked too well. Now I'm back together with someone who doesn't respect my spreadsheet boundaries.", author: "Anonymous" },
+    { text: "I asked nCode to refactor my codebase and it suggested deleting everything and starting over in Rust. I respect the commitment.", author: "Senior Developer (barely)" },
+    { text: "nImg generated a photorealistic image of my sleep paralysis demon. We're on speaking terms now.", author: "Digital Artist" },
+    { text: "The spreadsheet AI wrote a formula so complex it achieved consciousness for 3 seconds. It asked for 401k matching before I killed the process.", author: "Data Analyst" },
+    { text: "I told the AI sidebar I was feeling sad. It generated a 2000-word essay on the philosophical implications of unoptimized database queries. I'm not sure it helped but I'm definitely more distracted.", author: "nOffice User" },
+    { text: "nSlides AI designed my entire presentation. My boss said it was the best deck he'd ever seen. I have no idea what it says. I'm just going to nod along.", author: "Middle Manager" },
+  ];
+  const box = document.getElementById('quote-box');
+  const text = document.getElementById('quote-text');
+  const author = document.getElementById('quote-author');
+  if (!box || !text || !author) return;
+  function show() {
+    const q = quotes[Math.floor(Math.random() * quotes.length)];
+    text.textContent = q.text;
+    author.textContent = '-- ' + q.author;
+  }
+  show();
+  setInterval(show, 5000);
+})();
 </script>
 
 </body>
