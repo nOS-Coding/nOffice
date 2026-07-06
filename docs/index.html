@@ -208,30 +208,6 @@ nav {
 .feature-card h4 { color: var(--gray-100); font-size: 0.9375rem; margin-bottom: 4px; }
 .feature-card p { color: var(--gray-500); font-size: 0.8125rem; line-height: 1.6; }
 
-.term-demo {
-  background: #0d0d12; border: 1px solid var(--gray-800);
-  border-radius: 8px; overflow: hidden; width: 100%; max-width: 480px;
-  font-size: 0.8125rem; box-shadow: 0 0 40px rgba(76,110,245,0.04);
-  margin: 24px 0;
-}
-.term-bar {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 14px; background: rgba(255,255,255,0.03);
-  border-bottom: 1px solid var(--gray-800);
-}
-.term-dots { display: flex; gap: 6px; }
-.term-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-700); }
-.term-dots span:first-child { background: #ff5f57; }
-.term-dots span:nth-child(2) { background: #ffbd2e; }
-.term-dots span:nth-child(3) { background: #28c840; }
-.term-title { color: var(--gray-600); font-size: 0.6875rem; margin-left: 8px; }
-.term-body { padding: 16px 18px; min-height: 140px; }
-.term-output { color: var(--gray-500); line-height: 1.6; margin: 2px 0 2px 0; white-space: pre-wrap; }
-.term-output .hl-blue { color: var(--blue-bright); }
-.term-output .hl-green { color: #50fa7b; }
-.term-output .hl-pink { color: #ff79c6; }
-.term-output .hl-yellow { color: #f1fa8c; }
-
 .price-card {
   background: var(--black-soft); border: 1px solid var(--gray-800);
   border-radius: 6px; padding: 28px 24px; text-align: center; max-width: 24rem;
@@ -349,10 +325,6 @@ footer {
       <a href="https://github.com/nOS-Coding/nOffice/releases" class="btn btn-outline">Download</a>
     </div>
 
-    <div class="term-demo" id="term-demo">
-      <div class="term-bar"><span class="term-dots"><span></span><span></span><span></span></span><span class="term-title">noffice@local:~</span></div>
-      <div class="term-body" id="term-body"></div>
-    </div>
   </section>
 
   <section class="section" id="apps">
@@ -618,86 +590,7 @@ footer {
   draw();
 })();
 
-(function() {
-  const typeLines = [
-    { cmd: 'noffice status', out: 'All 5 apps ready. AI model: Qwen3-8B (loaded). GPU: Metal. Existential dread: nominal.' },
-    { cmd: 'noffice launch nwrite', out: 'Opening nWrite (1280x900)... ready.' },
-    { cmd: 'noffice launch ncode', out: 'Opening nCode (1400x950)... ready.' },
-    { cmd: 'noffice ai chat "write a haiku about spreadsheets"', out: '<span class="hl-blue">AI:</span> Columns and rows dance / Numbers whisper their secrets / Undo is your friend' },
-    { cmd: 'noffice ai generate "image: cat in spacesuit playing guitar"', out: '<span class="hl-blue">nImg:</span> Generating... done. Saved to ~/Pictures/space_cat.png' },
-    { cmd: undefined, out: '<span class="hl-green">Ready.</span> <span class="hl-yellow">All systems operational.</span> <span class="hl-pink">AI is judging your folder structure.</span>' },
-  ];
 
-  const body = document.querySelector('.term-body');
-  if (!body) return;
-
-  let idx = 0, ci = 0, typing = true;
-  const promptEl = document.createElement('div');
-  promptEl.style.cssText = 'color:var(--blue-bright);margin-right:8px';
-  promptEl.textContent = '$';
-  const inputEl = document.createElement('span');
-  inputEl.style.cssText = 'color:var(--gray-300)';
-  const cursorEl = document.createElement('span');
-  cursorEl.style.cssText = 'animation:blink 0.8s step-end infinite;color:var(--blue);font-weight:700';
-  cursorEl.textContent = '|';
-
-  const style = document.createElement('style');
-  style.textContent = '@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}';
-  document.head.appendChild(style);
-
-  function tick() {
-    const line = typeLines[idx];
-    if (!line) {
-      idx = 0; ci = 0; typing = true;
-      setTimeout(() => { body.innerHTML = ''; tick(); }, 4000);
-      return;
-    }
-    if (line.cmd !== undefined && typing) {
-      if (ci === 0) {
-        body.innerHTML = '';
-        const lineDiv = document.createElement('div');
-        lineDiv.style.cssText = 'margin-bottom:4px';
-        lineDiv.appendChild(promptEl.cloneNode(true));
-        const inp = document.createElement('span');
-        inp.style.cssText = 'color:var(--gray-300)';
-        lineDiv.appendChild(inp);
-        lineDiv.appendChild(cursorEl.cloneNode(true));
-        body.appendChild(lineDiv);
-      }
-      const lastLine = body.lastChild;
-      const inpSpan = lastLine.querySelector('span');
-      if (inpSpan) {
-        inpSpan.textContent = line.cmd.slice(0, ci + 1);
-        ci++;
-      }
-      if (ci < line.cmd.length) { setTimeout(tick, 30 + Math.random() * 25); return; }
-      typing = false;
-      setTimeout(tick, 200);
-      return;
-    }
-    if (line.cmd !== undefined && !typing) {
-      const div = document.createElement('div');
-      div.style.cssText = 'margin:4px 0 6px 0;color:var(--gray-500);line-height:1.6;white-space:pre-wrap';
-      div.textContent = line.out;
-      body.appendChild(div);
-      idx++; ci = 0; typing = true;
-      const delay = typeLines[idx] && typeLines[idx].cmd === undefined ? 400 : 600;
-      setTimeout(tick, delay);
-      return;
-    }
-    if (line.cmd === undefined) {
-      const div = document.createElement('div');
-      div.style.cssText = 'margin:4px 0 6px 0;color:var(--gray-500);line-height:1.6;white-space:pre-wrap';
-      div.innerHTML = line.out;
-      body.appendChild(div);
-      setTimeout(() => {
-        idx = 0; ci = 0; typing = true; body.innerHTML = '';
-        setTimeout(tick, 800);
-      }, 4000);
-    }
-  }
-  tick();
-})();
 
 (function() {
   const els = document.querySelectorAll('.reveal');
