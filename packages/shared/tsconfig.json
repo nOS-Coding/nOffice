@@ -1,9 +1,0 @@
-{
-  "extends": "@noffice/configs/tsconfig/package",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "composite": true
-  },
-  "include": ["src"]
-}

@@ -1,41 +1,9 @@
 # nOffice
 
-Cross-platform desktop office suite with deeply embedded local AI.
+AI-powered desktop office suite for macOS, Windows, and Linux.
 
-- **nWrite** — Word processor (TipTap/ProseMirror)
-- **nSheet** — Spreadsheet (HyperFormula + PixiJS WebGL)
-- **nSlides** — Presentations (SVG + Canvas)
-- **nImg** — Image editor + paint + generative media (PixiJS)
-- **nCode** — Multi-language IDE (Monaco Editor)
+[**noffice.ai**](https://noffice.ai) &middot; [Releases](https://github.com/nOS-Coding/nOffice/releases) &middot; [Pricing](https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de)
 
-Built with **Tauri 2.x**, **React + TypeScript**, **pnpm + Turborepo**.
+Five native apps — nWrite, nSheet, nSlides, nImg, nCode — with a local AI assistant. Fully offline, zero telemetry.
 
-## Prerequisites
-
-- Node.js 20 LTS
-- pnpm 10
-- Rust 1.81+
-- Tauri system deps (see [Tauri docs](https://v2.tauri.app/start/prerequisites/))
-
-## Getting Started
-
-```bash
-pnpm install
-pnpm dev          # Run launcher in dev mode
-pnpm tauri dev    # Run full Tauri app
-```
-
-## Build
-
-```bash
-pnpm build
-pnpm tauri build  # Production build
-```
-
-## Architecture
-
-See [ARCHITECTURE.md](docs/ARCHITECTURE.md) and [VISION.md](docs/VISION.md).
-
-## License
-
-Proprietary — see LICENSE file.
+Proprietary software. See [LICENSE](/LICENSE).
