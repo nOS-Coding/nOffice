@@ -1,0 +1,38 @@
+[package]
+name = "noffice"
+version = "2026.7.0"
+description = "nOffice - Cross-platform office suite with local AI"
+authors = ["nOffice Team"]
+edition = "2021"
+rust-version = "1.81"
+
+[lib]
+name = "noffice_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-process = "2"
+tauri-plugin-updater = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+sled = "0.34"
+hf-hub = "0.4"
+llama-cpp-2 = { version = "0.1", features = ["metal"] }
+anyhow = "1"
+thiserror = "2"
+uuid = { version = "1", features = ["v4"] }
+dirs = "6"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

@@ -1,0 +1,15 @@
+{
+  "name": "@noffice/configs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig/*": "./tsconfig/*.json",
+    "./tailwind": "./tailwind.config.ts",
+    "./biome": "./biome.json"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "@biomejs/biome": "^1.9.0"
+  }
+}
