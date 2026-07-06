@@ -208,19 +208,35 @@ nav {
 .feature-card h4 { color: var(--gray-100); font-size: 0.9375rem; margin-bottom: 4px; }
 .feature-card p { color: var(--gray-500); font-size: 0.8125rem; line-height: 1.6; }
 
+.price-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 40rem;
+}
+@media (max-width: 36rem) { .price-grid { grid-template-columns: 1fr; } }
+
 .price-card {
   background: var(--black-soft); border: 1px solid var(--gray-800);
-  border-radius: 6px; padding: 28px 24px; text-align: center; max-width: 24rem;
-  display: flex; flex-direction: column;
+  border-radius: 8px; padding: 28px 24px; text-align: center;
+  display: flex; flex-direction: column; position: relative;
+  transition: all .25s;
 }
-.price-card.featured { border-color: var(--blue); background: rgba(76,110,245,0.04); }
-.price-card h4 { color: var(--gray-100); font-size: 1.125rem; margin-bottom: 4px; }
-.price-card .price { font-size: 2rem; font-weight: 700; color: var(--gray-100); margin: 12px 0 4px; }
-.price-card .price-sub { color: var(--gray-500); font-size: 0.8125rem; margin-bottom: 20px; }
+.price-card:hover { border-color: var(--gray-700); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+.price-card.featured {
+  border-color: var(--blue);
+  background: linear-gradient(135deg, rgba(76,110,245,0.06) 0%, rgba(76,110,245,0.02) 100%);
+}
+.price-card.featured::after {
+  content: 'BEST VALUE'; position: absolute; top: -10px; right: 16px;
+  background: var(--blue); color: white; font-size: 0.625rem; font-weight: 700;
+  padding: 2px 10px; border-radius: 3px; letter-spacing: 0.05em;
+}
+.price-card h4 { color: var(--gray-100); font-size: 1rem; margin-bottom: 2px; }
+.price-card .price { font-size: 2.5rem; font-weight: 700; color: var(--gray-100); margin: 12px 0 2px; letter-spacing: -0.02em; }
+.price-card .price-sub { color: var(--gray-500); font-size: 0.75rem; margin-bottom: 20px; }
 .price-card ul { list-style: none; text-align: left; margin-bottom: 20px; flex: 1; }
-.price-card ul li { font-size: 0.8125rem; color: var(--gray-400); padding: 4px 0; display: flex; gap: 8px; }
-.price-card ul li::before { content: ">"; color: var(--blue); }
-.price-card .btn { width: 100%; justify-content: center; }
+.price-card ul li { font-size: 0.8125rem; color: var(--gray-400); padding: 5px 0; display: flex; gap: 8px; align-items: center; }
+.price-card ul li::before { content: ">"; color: var(--blue); font-weight: 700; }
+.price-card .btn { width: 100%; justify-content: center; height: 42px; }
+.price-card .btn:hover { transform: translateY(-1px); }
 
 .compare-wrap { overflow-x: auto; }
 .compare-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
@@ -392,21 +408,31 @@ footer {
       <p class="sub">Single subscription, all apps, all features. 14-day trial. No credit card required for the trial because we trust you. Please don't prove us wrong.</p>
     </div>
 
-    <div class="reveal" style="display:flex;justify-content:center">
-      <div class="price-card featured">
-        <h4>nOffice</h4>
+    <div class="reveal price-grid" style="margin:0 auto">
+      <div class="price-card">
+        <h4>Monthly</h4>
         <div class="price">$8</div>
-        <div class="price-sub">per month or $85/year (you do the math, we believe in you)</div>
+        <div class="price-sub">billed monthly</div>
         <ul>
           <li>All five apps</li>
-          <li>Built-in AI (all modes, all sass)</li>
+          <li>Built-in AI</li>
           <li>All file formats</li>
           <li>Auto-save + version history</li>
-          <li>Cross-platform (macOS, Windows, Linux)</li>
           <li>14-day free trial</li>
-          <li>No hidden fees (we promise on our favorite IDE)</li>
         </ul>
         <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" class="btn btn-primary">Start free trial &rarr;</a>
+      </div>
+      <div class="price-card featured">
+        <h4>Yearly</h4>
+        <div class="price">$85</div>
+        <div class="price-sub">$7.08/mo &mdash; save 2 months</div>
+        <ul>
+          <li>Everything in Monthly</li>
+          <li>Priority email support</li>
+          <li>Early access to updates</li>
+          <li>Best value &mdash; 2 months free</li>
+        </ul>
+        <a href="https://holmiumai.lemonsqueezy.com/checkout/buy/576dd66a-d746-4177-a77b-82da16ef77de" class="btn btn-primary">Subscribe yearly &rarr;</a>
       </div>
     </div>
 
