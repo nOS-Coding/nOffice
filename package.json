@@ -1,0 +1,30 @@
+{
+  "name": "noffice",
+  "private": true,
+  "version": "2026.7.0",
+  "packageManager": "pnpm@10.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "clean": "turbo clean",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "tauri": "tauri",
+    "storybook": "cd packages/ui-core && storybook dev -p 6006",
+    "build:storybook": "cd packages/ui-core && storybook build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0",
+    "@types/node": "^20.0.0"
+  }
+}

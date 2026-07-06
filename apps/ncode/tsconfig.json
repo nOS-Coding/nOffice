@@ -1,0 +1,13 @@
+{
+  "extends": "@noffice/configs/tsconfig/app",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "jsx": "react-jsx"
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../../packages/ui-core" },
+    { "path": "../../packages/shared" }
+  ]
+}

@@ -1,0 +1,16 @@
+# Default owners
+*       @noffice/core
+
+# AI/ML pipeline
+/src-tauri/src/ai/  @noffice/ai
+
+# IDE
+/apps/ncode/        @noffice/ide
+
+# Office apps
+/apps/nwrite/       @noffice/office
+/apps/nsheet/       @noffice/office
+/apps/nslides/      @noffice/office
+
+# Image editor
+/apps/nimg/         @noffice/media

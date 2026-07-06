@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nOffice — AI-powered office suite</title>
+<meta name="description" content="nOffice is a cross-platform desktop office suite with local AI. nWrite, nSheet, nSlides, nImg, nCode — all offline, all private.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --fm: "IBM Plex Mono", ui-monospace, 'SF Mono', 'Cascadia Code', 'Fira Code', Menlo, Consolas, monospace;
+  --black: #0a0a0b;
+  --black-soft: #121214;
+  --gray-900: #18181b;
+  --gray-800: #27272a;
+  --gray-700: #3f3f46;
+  --gray-600: #52525b;
+  --gray-500: #71717a;
+  --gray-400: #a1a1aa;
+  --gray-300: #d4d4d8;
+  --gray-200: #e4e4e7;
+  --gray-100: #f4f4f5;
+  --blue: #4c6ef5;
+  --blue-dim: rgba(76, 110, 245, 0.12);
+  --blue-bright: #748ffc;
+  --green: #2b8a3e;
+  --orange: #e67700;
+  --purple: #cc5de8;
+  --pink: #d6336c;
+  --indigo: #1971c2;
+  --padding: 5rem;
+  --vp: 4rem;
+}
+
+@media (max-width: 60rem) {
+  :root { --padding: 1.5rem; --vp: 3rem; }
+}
+
+::selection { background: var(--blue); color: white; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--fm);
+  background: var(--black);
+  color: var(--gray-400);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.7;
+}
+
+#bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+
+.page { position: relative; z-index: 1; max-width: 72rem; margin: 0 auto; padding: 0 var(--padding); }
+
+/* NAV */
+nav {
+  display: flex; justify-content: space-between; align-items: center;
+  height: 72px; border-bottom: 1px solid var(--gray-800);
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(10,10,11,0.85); backdrop-filter: blur(12px);
+}
+
+.logo {
+  display: flex; align-items: center; gap: 10px; text-decoration: none;
+  color: var(--gray-100); font-weight: 600; font-size: 1.125rem;
+}
+.logo svg { height: 28px; width: auto; }
+
+.nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+.nav-links a {
+  text-decoration: none; color: var(--gray-400); font-size: 0.875rem;
+  transition: color .15s;
+}
+.nav-links a:hover { color: var(--gray-100); }
+
+.nav-cta {
+  background: var(--blue); color: white !important; font-weight: 600;
+  padding: 6px 14px 6px 18px; border-radius: 4px;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.875rem;
+}
+.nav-cta:hover { background: #3b5bdb !important; color: white !important; }
+
+.mobile-toggle { display: none; background: none; border: none; color: var(--gray-400); cursor: pointer; padding: 8px; }
+.mobile-menu {
+  display: none; position: fixed; inset: 0; top: 72px;
+  background: rgba(10,10,11,0.98); z-index: 20; padding: 24px var(--padding);
+}
+.mobile-menu.open { display: block; }
+.mobile-menu a {
+  display: block; padding: 16px 0; color: var(--gray-400); text-decoration: none;
+  border-bottom: 1px solid var(--gray-800); font-size: 1rem;
+}
+@media (max-width: 40rem) { .nav-links { display: none; } .mobile-toggle { display: flex; } }
+
+/* HERO */
+.hero { padding: 5rem 0 4rem; position: relative; }
+.hero::before {
+  content: ''; position: absolute; top: -40%; left: -20%; width: 140%; height: 100%;
+  background: radial-gradient(ellipse at 50% 50%, var(--blue-dim) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--gray-900); border: 1px solid var(--gray-800);
+  padding: 4px 12px; border-radius: 4px; font-size: 0.75rem; color: var(--gray-500);
+  margin-bottom: 24px;
+}
+.hero-badge span { color: var(--blue); }
+
+.hero h1 {
+  font-size: clamp(1.75rem, 5vw, 3rem); font-weight: 700;
+  color: var(--gray-100); line-height: 1.15; margin-bottom: 20px;
+}
+.hero h1 .highlight {
+  background: linear-gradient(135deg, var(--blue), var(--blue-bright));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: 1rem; color: var(--gray-500); max-width: 65%;
+  margin-bottom: 32px;
+}
+@media (max-width: 50rem) { .hero p { max-width: 100%; } }
+
+.hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 20px; border-radius: 4px; font-family: var(--fm);
+  font-size: 0.9375rem; font-weight: 500; cursor: pointer; border: none;
+  text-decoration: none; transition: all .15s;
+}
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover { background: #3b5bdb; }
+.btn-outline { background: transparent; color: var(--gray-100); border: 1px solid var(--gray-700); }
+.btn-outline:hover { border-color: var(--gray-500); background: var(--gray-900); }
+
+/* SECTION */
+.section { padding: var(--vp) 0; }
+.section + .section { border-top: 1px solid var(--gray-800); }
+
+.section-label {
+  font-size: 0.75rem; color: var(--blue); text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 8px;
+}
+.section h2 {
+  font-size: 1.5rem; font-weight: 700; color: var(--gray-100);
+  margin-bottom: 12px;
+}
+.section > .sub { color: var(--gray-500); margin-bottom: 32px; max-width: 70%; }
+@media (max-width: 50rem) { .section > .sub { max-width: 100%; } }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* APPS GRID */
+.apps-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+@media (max-width: 56rem) { .apps-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 36rem) { .apps-grid { grid-template-columns: 1fr; } }
+
+.app-card {
+  background: var(--black-soft); border: 1px solid var(--gray-800);
+  border-radius: 6px; padding: 24px; transition: border-color .2s;
+}
+.app-card:hover { border-color: var(--gray-700); }
+.app-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 12px; color: white; }
+.app-card h4 { color: var(--gray-100); font-size: 1rem; margin-bottom: 4px; }
+.app-card p { color: var(--gray-500); font-size: 0.8125rem; line-height: 1.6; }
+
+/* FEATURES GRID */
+.features-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+}
+@media (max-width: 48rem) { .features-grid { grid-template-columns: 1fr; } }
+
+.feature-card {
+  background: var(--black-soft); border: 1px solid var(--gray-800);
+  border-radius: 6px; padding: 20px 24px; display: flex; gap: 14px;
+  transition: border-color .2s;
+}
+.feature-card:hover { border-color: var(--gray-700); }
+.feat-icon { flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: var(--gray-900); color: var(--blue); font-size: 0.875rem; }
+.feature-card h4 { color: var(--gray-100); font-size: 0.9375rem; margin-bottom: 4px; }
+.feature-card p { color: var(--gray-500); font-size: 0.8125rem; line-height: 1.6; }
+
+/* ARCH DIAGRAM */
+.diagram {
+  background: var(--black-soft); border: 1px solid var(--gray-800);
+  border-radius: 6px; padding: 2rem; overflow-x: auto; margin-top: 24px;
+}
+.diagram pre { font-family: var(--fm); font-size: 0.8125rem; line-height: 1.6; color: var(--gray-500); }
+.diagram pre .hl { color: var(--blue); }
+.diagram pre .hl2 { color: var(--blue-bright); }
+
+/* TERMINAL */
+.term-demo {
+  background: #0d0d12; border: 1px solid var(--gray-800);
+  border-radius: 8px; overflow: hidden; width: 100%; max-width: 560px;
+  font-size: 0.8125rem; box-shadow: 0 0 40px rgba(76,110,245,0.04);
+  margin: 24px 0;
+}
+.term-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--gray-800);
+}
+.term-dots { display: flex; gap: 6px; }
+.term-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--gray-700); }
+.term-dots span:first-child { background: #ff5f57; }
+.term-dots span:nth-child(2) { background: #ffbd2e; }
+.term-dots span:nth-child(3) { background: #28c840; }
+.term-title { color: var(--gray-600); font-size: 0.6875rem; margin-left: 8px; }
+.term-body { padding: 16px 18px; min-height: 120px; }
+.term-line { margin-bottom: 4px; word-break: break-all; }
+.term-prompt { color: var(--gray-500); margin: 0 8px; }
+.term-typed { color: var(--gray-300); }
+.term-typed::after { content: '|'; animation: blink 0.9s step-end infinite; color: var(--blue); font-weight: 700; }
+.term-output { color: var(--gray-500); line-height: 1.6; margin: 2px 0 2px 20px; white-space: pre-wrap; }
+.term-output .hl-blue { color: var(--blue-bright); }
+.term-output .hl-green { color: #50fa7b; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* PRICING */
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 36rem;
+}
+@media (max-width: 36rem) { .pricing-grid { grid-template-columns: 1fr; } }
+
+.price-card {
+  background: var(--black-soft); border: 1px solid var(--gray-800);
+  border-radius: 6px; padding: 28px 24px; text-align: center;
+}
+.price-card.featured { border-color: var(--blue); background: rgba(76,110,245,0.04); }
+.price-card h4 { color: var(--gray-100); font-size: 1.125rem; margin-bottom: 4px; }
+.price-card .price { font-size: 2rem; font-weight: 700; color: var(--gray-100); margin: 12px 0 4px; }
+.price-card .price-sub { color: var(--gray-500); font-size: 0.8125rem; margin-bottom: 20px; }
+.price-card ul { list-style: none; text-align: left; margin-bottom: 20px; }
+.price-card ul li { font-size: 0.8125rem; color: var(--gray-400); padding: 4px 0; display: flex; gap: 8px; }
+.price-card ul li::before { content: ">"; color: var(--blue); }
+
+/* COMPARE TABLE */
+.compare-wrap { overflow-x: auto; }
+.compare-table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.compare-table th, .compare-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--gray-800); }
+.compare-table th { color: var(--gray-300); font-weight: 600; }
+.compare-table td { color: var(--gray-400); }
+.compare-table td:first-child { color: var(--gray-300); }
+.compare-table .check { color: var(--green); }
+.compare-table .cross { color: var(--gray-600); }
+.compare-table .partial { color: var(--orange); }
+
+/* FAQ */
+.faq-list { list-style: none; }
+.faq-item { border-bottom: 1px solid var(--gray-800); }
+.faq-q {
+  width: 100%; display: flex; gap: 16px; align-items: center;
+  padding: 20px 0; background: none; border: none; cursor: pointer;
+  font-family: var(--fm); font-size: 0.9375rem; color: var(--gray-100);
+  text-align: left;
+}
+.faq-q .indicator { color: var(--gray-600); font-size: 1.1rem; flex-shrink: 0; }
+.faq-q:hover { color: var(--blue); }
+.faq-a { padding: 0 0 20px 32px; color: var(--gray-500); font-size: 0.875rem; display: none; line-height: 1.8; }
+.faq-a.open { display: block; }
+.faq-a a { color: var(--blue); }
+
+/* FOOTER */
+.footer-links {
+  display: flex; gap: 32px; justify-content: center; flex-wrap: wrap;
+  padding: 2rem 0; border-top: 1px solid var(--gray-800);
+}
+.footer-links a { color: var(--gray-500); text-decoration: none; font-size: 0.875rem; }
+.footer-links a:hover { color: var(--gray-100); }
+.legal {
+  display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;
+  padding: 1.5rem 0 0; color: var(--gray-600); font-size: 0.75rem;
+}
+.legal a { color: var(--gray-600); text-decoration: none; }
+.legal a:hover { color: var(--gray-400); }
+
+/* DOWNLOAD CARDS */
+.dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+@media (max-width: 48rem) { .dl-grid { grid-template-columns: 1fr; } }
+
+.dl-card {
+  background: var(--black-soft); border: 1px solid var(--gray-800);
+  border-radius: 6px; padding: 24px; transition: border-color .2s;
+}
+.dl-card:hover { border-color: var(--gray-700); }
+.dl-card h4 { color: var(--gray-100); font-size: 1rem; margin-bottom: 4px; }
+.dl-card .tag { display: inline-block; font-size: 0.6875rem; color: var(--gray-500); background: var(--gray-900); padding: 2px 8px; border-radius: 3px; margin-bottom: 16px; }
+.dl-card ul { list-style: none; }
+.dl-card ul li { font-size: 0.8125rem; color: var(--gray-500); padding: 4px 0; display: flex; gap: 8px; }
+.dl-card ul li::before { content: ">"; color: var(--gray-600); }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="page">
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="logo">
+      <svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#4c6ef5"/><text x="14" y="19" font-family="sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">n</text></svg>
+      <span>nOffice</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#apps">Apps</a></li>
+      <li><a href="#features">AI</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="https://github.com/nOS-Coding/nOffice" class="nav-cta">GitHub &rarr;</a></li>
+    </ul>
+    <button class="mobile-toggle" onclick="document.querySelector('.mobile-menu').classList.toggle('open')" aria-label="Menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </nav>
+
+  <div class="mobile-menu">
+    <a href="#apps" onclick="document.querySelector('.mobile-menu').classList.remove('open')">Apps</a>
+    <a href="#features" onclick="document.querySelector('.mobile-menu').classList.remove('open')">AI</a>
+    <a href="#pricing" onclick="document.querySelector('.mobile-menu').classList.remove('open')">Pricing</a>
+    <a href="#faq" onclick="document.querySelector('.mobile-menu').classList.remove('open')">FAQ</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero reveal">
+    <div class="hero-badge"><span>v2026.7</span> &middot; Tauri 2.x &middot; macOS + Windows + Linux</div>
+    <h1>AI-powered office suite<br><span class="highlight">that runs on your machine</span></h1>
+    <p>nOffice is a cross-platform desktop suite with five apps — nWrite, nSheet, nSlides, nImg, and nCode — all powered by a local Qwen3 8B model. No cloud, no telemetry, no subscription for the AI. Everything runs fully offline on your own hardware.</p>
+    <div class="hero-buttons">
+      <a href="#downloads" class="btn btn-primary">Download</a>
+      <a href="#apps" class="btn btn-outline">See the apps</a>
+    </div>
+
+    <div class="term-demo" id="term-demo">
+      <div class="term-bar"><span class="term-dots"><span></span><span></span><span></span></span><span class="term-title">noffice@local:~</span></div>
+      <div class="term-body" id="term-body">
+        <div class="term-line"><span class="hl-blue" style="color:#4c6ef5">noffice@local</span>:<span style="color:#8be9fd">~</span><span class="term-prompt">$</span> <span class="term-typed"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPS -->
+  <section class="section" id="apps">
+    <div class="reveal">
+      <div class="section-label">Apps</div>
+      <h2>Five tools, one suite</h2>
+      <p class="sub">Every app is a native Tauri window with its own AI sidebar. Launch from the nOffice shell, switch between them instantly.</p>
+    </div>
+
+    <div class="apps-grid">
+      <div class="app-card reveal"><div class="app-icon" style="background:#2b8a3e">W</div><h4>nWrite</h4><p>Full-featured word processor with TipTap/ProseMirror. Tables, images, math, track changes, footnotes, comments. Export to PDF, DOCX, HTML. Inline AI rewrite, summarize, and generate.</p></div>
+      <div class="app-card reveal"><div class="app-icon" style="background:#e67700">S</div><h4>nSheet</h4><p>Spreadsheet with HyperFormula engine and PixiJS WebGL virtualized grid. 1M+ rows. Full chart suite (bar, line, pie, scatter, area, bubble). AI formula generation and data analysis.</p></div>
+      <div class="app-card reveal"><div class="app-icon" style="background:#cc5de8">P</div><h4>nSlides</h4><p>Presentation tool with SVG + Canvas rendering. Full transitions including morph. Export to PDF and PPTX. AI slide generation and speaker note drafting.</p></div>
+      <div class="app-card reveal"><div class="app-icon" style="background:#d6336c">I</div><h4>nImg</h4><p>Image editor with PixiJS WebGL canvas. Brush, eraser, shapes, text, clone stamp, gradient, blur. Full layer system. Generative AI via txt2img, img2img, inpainting, outpainting.</p></div>
+      <div class="app-card reveal"><div class="app-icon" style="background:#1971c2">C</div><h4>nCode</h4><p>Multi-language IDE with Monaco Editor. Bundled LSP servers (pyright, clangd, rust-analyzer, gopls, solargraph). Git integration, multi-root workspaces. Ghost text, inline chat, explain, refactor.</p></div>
+      <div class="app-card reveal" style="grid-column: span 1;">
+        <div class="app-icon" style="background:var(--gray-700);font-size:0.75rem;font-weight:600">AI</div>
+        <h4>Every app has AI</h4>
+        <p>Shared AI sidebar with 6 context modes: free chat, edit selection, explain, generate, summarize, translate. Local Qwen3 8B model. Fully offline inference.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="reveal">
+      <div class="section-label">AI</div>
+      <h2>Local AI, built in</h2>
+      <p class="sub">No cloud dependency. No API keys. No data leaving your machine. The Rust backend manages a llama.cpp instance running Qwen3 8B GGUF (Q4_K_M) with 32K context window. Chat and embedding models run concurrently.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card reveal"><div class="feat-icon">&#9650;</div><div><h4>Qwen3 8B GGUF</h4><p>Q4_K_M quantized, 32K context window. GPU acceleration via Metal, CUDA, ROCm, or Vulkan. Model stored at ~/.noffice/models/, auto-downloaded on first launch from HuggingFace.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#9670;</div><div><h4>6 context modes</h4><p>Free chat, edit selection, explain, generate, summarize, translate. The AI sidebar streams responses via Tauri IPC events bridging the llama.cpp SSE stream.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#9724;</div><div><h4>Embedding pipeline</h4><p>Background tokio::mpsc queue processes document embeddings via a separate qwen3-embedding model. Per-document sled KV store for vector indices.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#9881;</div><div><h4>Stable Diffusion</h4><p>Auto1111 REST API integration at :7860. nImg supports txt2img, img2img, inpainting, outpainting. Rust probes port on launch, marks features as available or greyed-out.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#10005;</div><div><h4>Zero telemetry</h4><p>No analytics, no tracking, no prompt logging. The only network calls are the optional HuggingFace model download on first launch and periodic license check.</p></div></div>
+      <div class="feature-card reveal"><div class="feat-icon">&#128274;</div><div><h4>Fully offline</h4><p>Once the model is downloaded, everything works without internet. No cloud dependency of any kind. Your documents, your data, your machine.</p></div></div>
+    </div>
+
+    <div class="diagram reveal">
+<pre>
+<span class="hl">┌──────────────────────────────────────────────────┐</span>
+<span class="hl">│                    nOffice                        │</span>
+<span class="hl">│     Launcher Shell  ·  Tauri 2.x  ·  Rust       │</span>
+<span class="hl">├──────┬──────┬──────┬──────┬──────┬───────────────┤</span>
+<span class="hl">│nWrite│nSheet│nSlides│ nImg │ nCode │  AI Sidebar  │</span>
+<span class="hl">│TipTap│PixiJS│SVG+CV│PixiJS│Monaco│  6 modes     │</span>
+<span class="hl">├──────┴──────┴──────┴──────┴──────┴───────────────┤</span>
+<span class="hl">│           Rust Backend (single process)           │</span>
+<span class="hl2">│  llama.cpp  ·  Embedding Queue  ·  LSP Proxy    │</span>
+<span class="hl2">│  Sled KV    ·  Config  ·  Auto-save  ·  Menus    │</span>
+<span class="hl">└──────────────────────────────────────────────────┘</span>
+</pre>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section" id="pricing">
+    <div class="reveal">
+      <div class="section-label">Pricing</div>
+      <h2>$8/month, no tricks</h2>
+      <p class="sub">Single subscription covers all five apps and all AI features. 14-day full-feature trial. Periodic online check with grace period for offline use.</p>
+    </div>
+
+    <div class="pricing-grid reveal">
+      <div class="price-card featured">
+        <h4>Monthly</h4>
+        <div class="price">$8</div>
+        <div class="price-sub">per month</div>
+        <ul>
+          <li>All five apps</li>
+          <li>Local AI (all modes)</li>
+          <li>All file formats</li>
+          <li>Auto-save + version history</li>
+          <li>14-day free trial</li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="width:100%;justify-content:center">Start trial</a>
+      </div>
+      <div class="price-card">
+        <h4>Yearly</h4>
+        <div class="price">$85</div>
+        <div class="price-sub">per year ($7.08/mo)</div>
+        <ul>
+          <li>Everything in Monthly</li>
+          <li>2 months free</li>
+          <li>Priority email support</li>
+          <li>Early access to updates</li>
+        </ul>
+        <a href="#" class="btn btn-outline" style="width:100%;justify-content:center">Buy yearly</a>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:24px">
+      <div class="section-label" style="color:var(--gray-500)">vs competition</div>
+      <div class="compare-wrap" style="margin-top:12px">
+        <table class="compare-table">
+          <thead>
+            <tr><th></th><th>nOffice</th><th>LibreOffice</th><th>Microsoft 365</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Price</td><td class="check">$8/mo or $85/yr</td><td class="check">Free</td><td class="check">$10/mo (Personal)</td></tr>
+            <tr><td>Word processor</td><td class="check">nWrite</td><td class="check">Writer</td><td class="check">Word</td></tr>
+            <tr><td>Spreadsheet</td><td class="check">nSheet</td><td class="check">Calc</td><td class="check">Excel</td></tr>
+            <tr><td>Presentations</td><td class="check">nSlides</td><td class="check">Impress</td><td class="check">PowerPoint</td></tr>
+            <tr><td>Image editor</td><td class="check">nImg</td><td class="cross">&mdash;</td><td class="cross">&mdash;</td></tr>
+            <tr><td>IDE</td><td class="check">nCode</td><td class="cross">&mdash;</td><td class="cross">&mdash;</td></tr>
+            <tr><td>Local AI</td><td class="check">Built-in (Qwen3 8B)</td><td class="cross">&mdash;</td><td class="partial">Copilot (cloud)</td></tr>
+            <tr><td>Offline</td><td class="check">Full</td><td class="check">Full</td><td class="cross">Partial</td></tr>
+            <tr><td>Open source</td><td class="cross">Proprietary</td><td class="check">Yes (LGPL/MPL)</td><td class="cross">No</td></tr>
+            <tr><td>Docx support</td><td class="check">Native</td><td class="check">Good</td><td class="check">Native</td></tr>
+            <tr><td>Real-time collab</td><td class="partial">LAN (v1)</td><td class="cross">Limited</td><td class="check">Cloud</td></tr>
+            <tr><td>AI privacy</td><td class="check">100% local</td><td class="cross">N/A</td><td class="cross">Cloud-based</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOADS -->
+  <section class="section" id="downloads">
+    <div class="reveal">
+      <div class="section-label">Downloads</div>
+      <h2>Get nOffice</h2>
+      <p class="sub">Available for macOS ARM64/x64, Windows x64, and Linux x64 (AppImage + .deb).</p>
+    </div>
+    <div class="dl-grid reveal">
+      <div class="dl-card">
+        <h4>macOS</h4>
+        <div class="tag">Apple Silicon + Intel</div>
+        <ul>
+          <li>Native .dmg</li>
+          <li>macOS 14+</li>
+          <li>Apple Silicon & Intel</li>
+          <li>Metal GPU acceleration</li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="margin-top:16px;width:100%;justify-content:center">Download for macOS</a>
+      </div>
+      <div class="dl-card">
+        <h4>Windows</h4>
+        <div class="tag">x64</div>
+        <ul>
+          <li>MSI installer</li>
+          <li>Windows 10 22H2+</li>
+          <li>Authenticode signed</li>
+          <li>Vulkan GPU acceleration</li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="margin-top:16px;width:100%;justify-content:center">Download for Windows</a>
+      </div>
+      <div class="dl-card">
+        <h4>Linux</h4>
+        <div class="tag">AppImage + .deb</div>
+        <ul>
+          <li>Cross-distro AppImage</li>
+          <li>Debian/Ubuntu .deb</li>
+          <li>WebKitGTK + Vulkan</li>
+          <li>Self-contained</li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="margin-top:16px;width:100%;justify-content:center">Download for Linux</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="reveal">
+      <div class="section-label">FAQ</div>
+      <h2>Common questions</h2>
+    </div>
+    <ul class="faq-list reveal">
+      <li class="faq-item">
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Does nOffice require internet?</button>
+        <div class="faq-a">No. Everything runs fully offline once the AI model is downloaded. The only internet access is the optional HuggingFace model download on first launch and a periodic license check (with grace period for offline use). No telemetry, no analytics, no cloud dependency.</div>
+      </li>
+      <li class="faq-item">
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> What AI model does it use?</button>
+        <div class="faq-a">Qwen3 8B GGUF at Q4_K_M quantization with a 32K token context window. GPU acceleration via Metal (macOS), CUDA (NVIDIA), ROCm (AMD), or Vulkan (fallback). A separate qwen3-embedding model handles document embedding jobs. Models are stored at <code style="color:var(--gray-400)">~/.noffice/models/</code> and auto-downloaded from HuggingFace on first launch.</div>
+      </li>
+      <li class="faq-item">
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> What are the system requirements?</button>
+        <div class="faq-a">8 GB RAM minimum, 8 GB free disk for models, macOS 14+, Windows 10 22H2+, Linux (AppImage). For AI features, a GPU with 6 GB+ VRAM is recommended but not required — the model runs on CPU too, just slower.</div>
+      </li>
+      <li class="faq-item">
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Is there a free trial?</button>
+        <div class="faq-a">Yes. 14-day full-feature trial with no credit card required. All five apps and all AI features are fully functional during the trial period.</div>
+      </li>
+      <li class="faq-item">
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Is nOffice open source?</button>
+        <div class="faq-a">No. nOffice is proprietary/closed source. The source code is not publicly available.</div>
+      </li>
+      <li class="faq-item">
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> How does nCode compare to VS Code?</button>
+        <div class="faq-a">nCode uses the same Monaco Editor that powers VS Code, so the editing experience is identical. It includes bundled LSP servers for Python, C/C++, Rust, Go, and Ruby. The key difference is the deeply integrated local AI — ghost text, inline chat, explain, refactor, and generate, all running on your local Qwen3 model instead of GitHub Copilot's cloud.</div>
+      </li>
+      <li class="faq-item">
+        <button class="faq-q" onclick="faq(this)"><span class="indicator">+</span> Can nImg replace Photoshop / GIMP?</button>
+        <div class="faq-a">nImg is a capable image editor with full layer support, blending modes, and a comprehensive paint tool set. What sets it apart is generative AI — txt2img, img2img, inpainting, and outpainting via Stable Diffusion. It's not a 1:1 Photoshop replacement but offers unique AI capabilities that Photoshop only provides through cloud services.</div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-links">
+      <a href="#apps">Apps</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/nOS-Coding/nOffice">GitHub</a>
+      <a href="https://github.com/nOS-Coding/nOffice/issues">Issues</a>
+    </div>
+    <div class="legal">
+      <span>&copy; 2026 nOffice</span>
+      <span>Powered by Tauri, llama.cpp, and Qwen</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+// Particle grid background
+(function() {
+  const c = document.getElementById('bg-canvas');
+  const ctx = c.getContext('2d');
+  let w, h, particles = [];
+
+  function resize() { w = c.width = window.innerWidth; h = c.height = window.innerHeight; }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const cols = 20, rows = 12;
+  const spacingX = w / (cols + 1);
+  const spacingY = h / (rows + 1);
+
+  function init() {
+    particles = [];
+    for (let y = 0; y < rows; y++)
+      for (let x = 0; x < cols; x++)
+        particles.push({ ox: (x+1)*spacingX, oy: (y+1)*spacingY, phase: Math.random()*Math.PI*2, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3 });
+  }
+  init();
+
+  let mouseX = w/2, mouseY = h/2;
+  document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+
+  let time = 0;
+  function draw() {
+    time += 0.003;
+    ctx.clearRect(0, 0, w, h);
+    for (const p of particles) {
+      const dx = mouseX - p.ox, dy = mouseY - p.oy;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const pull = Math.max(0, 1 - dist/300) * 0.5;
+      p.vx += dx * pull * 0.01;
+      p.vy += dy * pull * 0.01;
+      p.vx *= 0.92; p.vy *= 0.92;
+      const sw = Math.sin(time + p.phase) * 15;
+      const x = p.ox + p.vx + sw * 0.3;
+      const y = p.oy + p.vy + Math.cos(time * 0.7 + p.phase) * 10;
+      ctx.beginPath();
+      ctx.arc(x, y, 1, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(76, 110, 245, 0.15)';
+      ctx.fill();
+    }
+    ctx.strokeStyle = 'rgba(76, 110, 245, 0.04)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i+1; j < particles.length; j++) {
+        const dx = particles[i].ox - particles[j].ox;
+        const dy = particles[i].oy - particles[j].oy;
+        if (dx*dx + dy*dy < 200*200) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].ox + particles[i].vx, particles[i].oy + particles[i].vy);
+          ctx.lineTo(particles[j].ox + particles[j].vx, particles[j].oy + particles[j].vy);
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// Terminal typing demo
+(function() {
+  const lines = [
+    { cmd: 'noffice --info', out: 'nOffice v2026.7 • Qwen3 8B Q4_K_M • 5 apps' },
+    { cmd: 'noffice launch nwrite', out: 'Opening nWrite window (1280x900)...' },
+    { cmd: 'noffice launch ncode', out: 'Opening nCode window (1400x950)...' },
+    { cmd: 'noffice ai status', out: 'Model: Qwen3 8B Q4_K_M • GPU: Metal • VRAM: 4.2 GB • 32K ctx' },
+    { cmd: 'noffice ai chat "summarize this document"', out: 'AI: This document outlines the quarterly revenue growth across three regions...' },
+    { cmd: undefined, out: '<span class="hl-blue">Ready. All apps offline. AI is local.</span>' },
+  ];
+
+  const el = document.querySelector('.term-typed');
+  const body = document.querySelector('.term-body');
+  if (!el || !body) return;
+
+  let lineIdx = 0, charIdx = 0, isTyping = true;
+
+  function tick() {
+    const line = lines[lineIdx];
+    if (!line) { setTimeout(tick, 4000); lineIdx = 0; return; }
+
+    if (line.cmd !== undefined && isTyping) {
+      if (charIdx < line.cmd.length) {
+        el.textContent = line.cmd.slice(0, charIdx + 1);
+        charIdx++;
+        setTimeout(tick, 40 + Math.random() * 30);
+        return;
+      }
+      isTyping = false;
+      setTimeout(tick, 300);
+      return;
+    }
+
+    if (line.cmd !== undefined && !isTyping) {
+      el.textContent = line.cmd;
+      const outEl = document.createElement('div');
+      outEl.className = 'term-output';
+      outEl.textContent = line.out;
+      body.appendChild(outEl);
+      lineIdx++; charIdx = 0; isTyping = true;
+      setTimeout(tick, lines[lineIdx] && lines[lineIdx].cmd === undefined ? 600 : 800);
+      return;
+    }
+
+    if (line.cmd === undefined) {
+      const outEl = document.createElement('div');
+      outEl.className = 'term-output';
+      outEl.innerHTML = line.out;
+      body.appendChild(outEl);
+      setTimeout(() => {
+        lineIdx = 0; charIdx = 0; isTyping = true;
+        el.textContent = '';
+        body.querySelectorAll('.term-output').forEach(e => e.remove());
+        setTimeout(tick, 1000);
+      }, 5000);
+    }
+  }
+  tick();
+})();
+
+// Scroll reveal
+(function() {
+  const els = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    for (const e of entries) { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }
+  }, { threshold: 0.1 });
+  for (const el of els) obs.observe(el);
+})();
+
+// FAQ
+function faq(btn) {
+  const answer = btn.nextElementSibling;
+  const indicator = btn.querySelector('.indicator');
+  const open = answer.classList.contains('open');
+  answer.classList.toggle('open');
+  indicator.textContent = open ? '+' : '\u2212';
+}
+</script>
+
+</body>
+</html>
