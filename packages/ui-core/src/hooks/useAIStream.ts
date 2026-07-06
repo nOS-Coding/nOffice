@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { type AIStreamChunk, AI_CONTEXT_MODES, type AIContextMode } from "@noffice/shared";
+import { type AIContextMode, type AIStreamChunk, AI_CONTEXT_MODES } from "@noffice/shared";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UseAIStreamOptions {
   onChunk?: (chunk: AIStreamChunk) => void;
@@ -20,7 +20,7 @@ interface UseAIStreamReturn {
 export function useAIStream(options: UseAIStreamOptions = {}): UseAIStreamReturn {
   const [isStreaming, setIsStreaming] = useState(false);
   const [content, setContent] = useState("");
-  const [mode, setModeState] = useState<AIContextMode>(AI_CONTEXT_MODES[0]!);
+  const [mode, setModeState] = useState<AIContextMode>(AI_CONTEXT_MODES[0]);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -39,7 +39,7 @@ export function useAIStream(options: UseAIStreamOptions = {}): UseAIStreamReturn
       setContent("");
       setIsStreaming(true);
 
-      const m = AI_CONTEXT_MODES.find((m) => m.id === modeId) ?? AI_CONTEXT_MODES[0]!;
+      const m = AI_CONTEXT_MODES.find((m) => m.id === modeId) ?? AI_CONTEXT_MODES[0];
       setModeState(m);
 
       try {

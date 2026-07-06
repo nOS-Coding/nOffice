@@ -1,6 +1,6 @@
+import { AISidebar, Button, useTheme } from "@noffice/ui-core";
+import { Bot, Copy, Eye, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useTheme, AISidebar, Button } from "@noffice/ui-core";
-import { Plus, Trash2, Copy, Eye, Bot } from "lucide-react";
 
 interface Slide {
   id: string;
@@ -40,13 +40,17 @@ export function App() {
             <Button variant="ghost" size="sm" onClick={addSlide}>
               <Plus className="mr-1 h-4 w-4" /> Add Slide
             </Button>
-            <Button variant="ghost" size="icon"><Copy className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon">
+              <Copy className="h-4 w-4" />
+            </Button>
             <Button variant="ghost" size="icon" onClick={() => deleteSlide(activeSlide)}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm"><Eye className="mr-1 h-4 w-4" /> Present</Button>
+            <Button variant="ghost" size="sm">
+              <Eye className="mr-1 h-4 w-4" /> Present
+            </Button>
             <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
               <Bot className="h-4 w-4" />
             </Button>
@@ -57,6 +61,7 @@ export function App() {
           <div className="w-48 overflow-y-auto border-r border-border p-2 dark:border-border-dark">
             {slides.map((slide, i) => (
               <button
+                type="button"
                 key={slide.id}
                 onClick={() => setActiveSlide(slide.id)}
                 className={`mb-2 w-full rounded-lg border p-3 text-left text-xs transition-colors ${
@@ -98,7 +103,11 @@ export function App() {
           </div>
         </div>
       </div>
-      <AISidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} appContext="nSlides Presentation" />
+      <AISidebar
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(false)}
+        appContext="nSlides Presentation"
+      />
     </div>
   );
 }

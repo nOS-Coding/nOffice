@@ -6,8 +6,5 @@
     "jsx": "react-jsx"
   },
   "include": ["src"],
-  "references": [
-    { "path": "../../packages/ui-core" },
-    { "path": "../../packages/shared" }
-  ]
+  "references": [{ "path": "../../packages/ui-core" }, { "path": "../../packages/shared" }]
 }

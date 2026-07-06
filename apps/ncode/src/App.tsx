@@ -1,9 +1,17 @@
-import { useState, useCallback, useRef } from "react";
-import { useTheme, AISidebar, Button } from "@noffice/ui-core";
 import Editor, { type OnMount } from "@monaco-editor/react";
+import { AISidebar, Button, useTheme } from "@noffice/ui-core";
 import {
-  FolderOpen, Files, Search, GitBranch, Play, Bug, Bot, PanelLeftClose, PanelLeft,
+  Bot,
+  Bug,
+  Files,
+  FolderOpen,
+  GitBranch,
+  PanelLeft,
+  PanelLeftClose,
+  Play,
+  Search,
 } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
 
 const DEFAULT_CODE = `// Welcome to nCode - AI-powered IDE
 function greet(name: string): string {
@@ -14,7 +22,14 @@ console.log(greet("Developer"));
 `;
 
 const FILE_TREE = [
-  { name: "src", type: "folder", children: [{ name: "index.ts", type: "file" }, { name: "utils.ts", type: "file" }] },
+  {
+    name: "src",
+    type: "folder",
+    children: [
+      { name: "index.ts", type: "file" },
+      { name: "utils.ts", type: "file" },
+    ],
+  },
   { name: "package.json", type: "file" },
   { name: "tsconfig.json", type: "file" },
 ];
@@ -38,15 +53,29 @@ export function App() {
         <div className="flex items-center justify-between border-b border-border px-4 py-1 dark:border-border-dark">
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" onClick={() => setShowExplorer(!showExplorer)}>
-              {showExplorer ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+              {showExplorer ? (
+                <PanelLeftClose className="h-4 w-4" />
+              ) : (
+                <PanelLeft className="h-4 w-4" />
+              )}
             </Button>
-            <Button variant="ghost" size="icon"><Files className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon"><Search className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon"><GitBranch className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon">
+              <Files className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <Search className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <GitBranch className="h-4 w-4" />
+            </Button>
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm"><Play className="mr-1 h-3 w-3" /> Run</Button>
-            <Button variant="ghost" size="sm"><Bug className="mr-1 h-3 w-3" /> Debug</Button>
+            <Button variant="ghost" size="sm">
+              <Play className="mr-1 h-3 w-3" /> Run
+            </Button>
+            <Button variant="ghost" size="sm">
+              <Bug className="mr-1 h-3 w-3" /> Debug
+            </Button>
             <div className="mx-2 h-5 w-px bg-border dark:bg-border-dark" />
             <select
               className="rounded bg-transparent text-xs"
@@ -69,7 +98,9 @@ export function App() {
         <div className="flex flex-1 overflow-hidden">
           {showExplorer && (
             <div className="w-56 overflow-y-auto border-r border-border bg-surface-secondary p-2 text-sm dark:border-border-dark dark:bg-surface-dark-secondary">
-              <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-gray-500">Explorer</p>
+              <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Explorer
+              </p>
               {FILE_TREE.map((item) => (
                 <div key={item.name}>
                   <div className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 hover:bg-surface-tertiary dark:hover:bg-surface-dark-tertiary">
@@ -118,7 +149,11 @@ export function App() {
           </div>
         </div>
       </div>
-      <AISidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} appContext="nCode IDE" />
+      <AISidebar
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(false)}
+        appContext="nCode IDE"
+      />
     </div>
   );
 }

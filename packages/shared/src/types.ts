@@ -133,7 +133,7 @@ export const APPS: Record<AppId, AppDefinition> = {
   },
 };
 
-export const AI_CONTEXT_MODES: AIContextMode[] = [
+export const AI_CONTEXT_MODES: readonly [AIContextMode, ...AIContextMode[]] = [
   { id: "free_chat", label: "Free Chat", icon: "message-circle" },
   { id: "edit_selection", label: "Edit Selection", icon: "pencil" },
   { id: "explain", label: "Explain", icon: "help-circle" },
@@ -168,11 +168,51 @@ export const AI_MODEL_INFO = {
 
 export const APP_WINDOWS: Record<AppId, WindowConfig> = {
   [AppId.Launcher]: { label: "noffice", title: "nOffice", width: 900, height: 650, url: "/" },
-  [AppId.NWrite]: { label: "nwrite", title: "nWrite", width: 1280, height: 900, minWidth: 800, minHeight: 600, url: "/" },
-  [AppId.NSheet]: { label: "nsheet", title: "nSheet", width: 1400, height: 900, minWidth: 900, minHeight: 600, url: "/" },
-  [AppId.NSlides]: { label: "nslides", title: "nSlides", width: 1280, height: 800, minWidth: 800, minHeight: 600, url: "/" },
-  [AppId.NImg]: { label: "nimg", title: "nImg", width: 1280, height: 900, minWidth: 800, minHeight: 600, url: "/" },
-  [AppId.NCode]: { label: "ncode", title: "nCode", width: 1400, height: 950, minWidth: 900, minHeight: 600, url: "/" },
+  [AppId.NWrite]: {
+    label: "nwrite",
+    title: "nWrite",
+    width: 1280,
+    height: 900,
+    minWidth: 800,
+    minHeight: 600,
+    url: "/",
+  },
+  [AppId.NSheet]: {
+    label: "nsheet",
+    title: "nSheet",
+    width: 1400,
+    height: 900,
+    minWidth: 900,
+    minHeight: 600,
+    url: "/",
+  },
+  [AppId.NSlides]: {
+    label: "nslides",
+    title: "nSlides",
+    width: 1280,
+    height: 800,
+    minWidth: 800,
+    minHeight: 600,
+    url: "/",
+  },
+  [AppId.NImg]: {
+    label: "nimg",
+    title: "nImg",
+    width: 1280,
+    height: 900,
+    minWidth: 800,
+    minHeight: 600,
+    url: "/",
+  },
+  [AppId.NCode]: {
+    label: "ncode",
+    title: "nCode",
+    width: 1400,
+    height: 950,
+    minWidth: 900,
+    minHeight: 600,
+    url: "/",
+  },
 };
 
 export const LSP_SERVERS: LSServerConfig[] = [

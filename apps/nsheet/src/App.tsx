@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import { useTheme, AISidebar, Button } from "@noffice/ui-core";
-import { Application, Container, Text as PixiText, Graphics } from "pixi.js";
-import { Undo, Redo, Plus, Bot } from "lucide-react";
+import { AISidebar, Button, useTheme } from "@noffice/ui-core";
+import { Bot, Plus, Redo, Undo } from "lucide-react";
+import { Application, Container, Graphics, Text as PixiText } from "pixi.js";
+import { useEffect, useRef, useState } from "react";
 
 const COLS = 26;
 const ROWS = 100;
@@ -25,13 +25,13 @@ export function App() {
 
     async function init() {
       await app.init({
-        resizeTo: canvasRef.current!,
+        resizeTo: canvasRef.current as HTMLElement,
         background: "#ffffff",
         antialias: true,
         resolution: window.devicePixelRatio || 1,
         autoDensity: true,
       });
-      canvasRef.current!.appendChild(app.canvas);
+      canvasRef.current?.appendChild(app.canvas);
 
       const gridContainer = new Container();
       app.stage.addChild(gridContainer);
@@ -90,12 +90,19 @@ export function App() {
     <div className="flex h-screen">
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="flex items-center gap-2 border-b border-border px-4 py-2 dark:border-border-dark">
-          <Button variant="ghost" size="icon"><Undo className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="icon"><Redo className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon">
+            <Undo className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon">
+            <Redo className="h-4 w-4" />
+          </Button>
           <div className="mx-2 h-6 w-px bg-border dark:bg-border-dark" />
           <div className="flex items-center gap-1 rounded-lg border border-border bg-surface px-3 py-1 text-sm dark:border-border-dark dark:bg-surface-dark">
             <span className="font-medium text-brand-600">fx</span>
-            <input className="flex-1 bg-transparent outline-none" placeholder="Enter value or formula..." />
+            <input
+              className="flex-1 bg-transparent outline-none"
+              placeholder="Enter value or formula..."
+            />
           </div>
           <div className="ml-auto flex items-center gap-2">
             <Button variant="ghost" size="sm">
@@ -108,7 +115,11 @@ export function App() {
         </div>
         <div ref={canvasRef} className="flex-1 overflow-hidden" />
       </div>
-      <AISidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} appContext="nSheet Spreadsheet" />
+      <AISidebar
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(false)}
+        appContext="nSheet Spreadsheet"
+      />
     </div>
   );
 }

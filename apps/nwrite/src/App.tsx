@@ -1,5 +1,5 @@
+import { AISidebar, useTheme } from "@noffice/ui-core";
 import { useState } from "react";
-import { useTheme, AISidebar } from "@noffice/ui-core";
 import { EditorCanvas } from "./components/EditorCanvas";
 import { Toolbar } from "./components/Toolbar";
 

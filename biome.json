@@ -24,5 +24,21 @@
       "trailingCommas": "all",
       "semicolons": "always"
     }
+  },
+  "files": {
+    "ignore": [
+      "node_modules",
+      "dist",
+      "target",
+      ".turbo",
+      "*.js",
+      "*.js.map",
+      "*.d.ts",
+      "*.d.ts.map",
+      "*.tsbuildinfo",
+      "pnpm-lock.yaml",
+      "Cargo.lock",
+      "src-tauri/gen"
+    ]
   }
 }

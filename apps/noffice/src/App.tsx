@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { useTheme } from "@noffice/ui-core";
+import { useState } from "react";
 import { LauncherPage } from "./pages/LauncherPage";
 import { SettingsPage } from "./pages/SettingsPage";
 

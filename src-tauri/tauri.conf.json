@@ -51,9 +51,7 @@
   "plugins": {
     "updater": {
       "active": true,
-      "endpoints": [
-        "https://releases.noffice.app/{{target}}/{{current_version}}"
-      ],
+      "endpoints": ["https://releases.noffice.app/{{target}}/{{current_version}}"],
       "dialog": true,
       "pubkey": ""
     }

@@ -1,8 +1,15 @@
-import { useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { DEFAULT_SETTINGS, type UserSettings } from "@noffice/shared";
-import { Button, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@noffice/ui-core";
+import {
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@noffice/ui-core";
+import { invoke } from "@tauri-apps/api/core";
 import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
 
 interface SettingsPageProps {
   onBack: () => void;
@@ -33,7 +40,7 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
           </h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-sm">Theme</label>
+              <span className="text-sm">Theme</span>
               <Select
                 value={settings.theme}
                 onValueChange={(v: "light" | "dark" | "system") => updateSetting("theme", v)}
@@ -49,7 +56,7 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
               </Select>
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm">Language</label>
+              <span className="text-sm">Language</span>
               <Select
                 value={settings.language}
                 onValueChange={(v: string) => updateSetting("language", v)}
@@ -76,7 +83,7 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
           </h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-sm">AI Features</label>
+              <span className="text-sm">AI Features</span>
               <label className="relative inline-flex cursor-pointer items-center">
                 <input
                   type="checkbox"
@@ -88,7 +95,7 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
               </label>
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm">Quantization</label>
+              <span className="text-sm">Quantization</span>
               <Select
                 value={settings.modelQuantization}
                 onValueChange={(v: string) => updateSetting("modelQuantization", v)}
@@ -112,7 +119,7 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
           </h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-sm">Auto-save</label>
+              <span className="text-sm">Auto-save</span>
               <label className="relative inline-flex cursor-pointer items-center">
                 <input
                   type="checkbox"
@@ -124,7 +131,7 @@ export function SettingsPage({ onBack }: SettingsPageProps) {
               </label>
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm">Auto-save interval (s)</label>
+              <span className="text-sm">Auto-save interval (s)</span>
               <input
                 type="number"
                 value={settings.autoSaveInterval}

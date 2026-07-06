@@ -1,24 +1,24 @@
-import { useState, useRef, useEffect } from "react";
+import { type AIContextMode, AI_CONTEXT_MODES } from "@noffice/shared";
 import {
-  MessageCircle,
-  Pencil,
-  HelpCircle,
-  Sparkles,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   Globe,
-  Send,
-  X,
-  ChevronRight,
-  ChevronLeft,
+  HelpCircle,
   Loader2,
+  MessageCircle,
+  Pencil,
+  Send,
+  Sparkles,
   Square,
+  X,
 } from "lucide-react";
-import { AI_CONTEXT_MODES } from "@noffice/shared";
+import { useEffect, useRef, useState } from "react";
 import { useAIStream } from "../../hooks/useAIStream";
-import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
+import { Button } from "../ui/button";
 
-const MODE_ICONS: Record<string, typeof MessageCircle> = {
+const MODE_ICONS: Record<AIContextMode["id"], typeof MessageCircle> = {
   free_chat: MessageCircle,
   edit_selection: Pencil,
   explain: HelpCircle,
@@ -36,14 +36,16 @@ interface AISidebarProps {
 
 export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISidebarProps) {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
+  const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>(
+    [],
+  );
   const { isStreaming, content, mode, startStream, cancelStream, setMode } = useAIStream();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, content]);
+  }, []);
 
   useEffect(() => {
     if (isOpen) inputRef.current?.focus();
@@ -93,9 +95,10 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
 
         <div className="flex gap-1 border-b border-border px-3 py-2 dark:border-border-dark">
           {AI_CONTEXT_MODES.map((m) => {
-            const Icon = MODE_ICONS[m.id]!;
+            const Icon = MODE_ICONS[m.id];
             return (
               <button
+                type="button"
                 key={m.id}
                 onClick={() => setMode(m.id)}
                 className={cn(
@@ -121,7 +124,10 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
             </div>
           )}
           {messages.map((msg, i) => (
-            <div key={i} className={cn("mb-4", msg.role === "user" ? "text-right" : "text-left")}>
+            <div
+              key={`${msg.role}-${i}`}
+              className={cn("mb-4", msg.role === "user" ? "text-right" : "text-left")}
+            >
               <div
                 className={cn(
                   "inline-block rounded-lg px-3 py-2 text-sm",
@@ -151,7 +157,8 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
           {selectedText && (
             <div className="mb-2 rounded-md bg-surface-secondary p-2 text-xs dark:bg-surface-dark-secondary">
               <span className="font-medium">Selected: </span>
-              {selectedText.slice(0, 100)}{selectedText.length > 100 ? "..." : ""}
+              {selectedText.slice(0, 100)}
+              {selectedText.length > 100 ? "..." : ""}
             </div>
           )}
           <div className="flex gap-2">

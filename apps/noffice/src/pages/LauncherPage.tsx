@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import { AppId, APPS, type AppDefinition } from "@noffice/shared";
+import { APPS, type AppDefinition, AppId } from "@noffice/shared";
 import { Button } from "@noffice/ui-core";
-import { Settings, Download, FileText } from "lucide-react";
+import { invoke } from "@tauri-apps/api/core";
+import { Download, FileText, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const APP_ICONS: Record<string, string> = {
   nwrite: "/icons/nwrite.png",
@@ -44,9 +44,7 @@ export function LauncherPage({ onOpenSettings }: LauncherPageProps) {
 
     invoke("get_recent_documents")
       .then((docs: unknown) => {
-        setRecentDocs(
-          (docs as Array<{ name: string; app_id: string }>).slice(0, 6),
-        );
+        setRecentDocs((docs as Array<{ name: string; app_id: string }>).slice(0, 6));
       })
       .catch(() => {});
   }, []);
@@ -97,22 +95,17 @@ export function LauncherPage({ onOpenSettings }: LauncherPageProps) {
       <div className="mb-6 grid grid-cols-5 gap-4">
         {APP_TILES.map((app) => (
           <button
+            type="button"
             key={app.id}
             onClick={() => openApp(app)}
             className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-surface-secondary p-6 transition-all hover:border-brand-500 hover:shadow-lg dark:border-border-dark dark:bg-surface-dark-secondary"
           >
             <div className="flex h-16 w-16 items-center justify-center">
-              <img
-                src={APP_ICONS[app.id]}
-                alt={app.name}
-                className="h-16 w-16"
-              />
+              <img src={APP_ICONS[app.id]} alt={app.name} className="h-16 w-16" />
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold">{app.name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {app.description}
-              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{app.description}</p>
             </div>
           </button>
         ))}
@@ -145,7 +138,7 @@ export function LauncherPage({ onOpenSettings }: LauncherPageProps) {
           <div className="grid grid-cols-3 gap-3">
             {recentDocs.map((doc, i) => (
               <div
-                key={i}
+                key={`${doc.name}-${i}`}
                 className="flex cursor-pointer items-center gap-3 rounded-lg border border-border p-3 text-sm hover:bg-surface-secondary dark:border-border-dark dark:hover:bg-surface-dark-secondary"
               >
                 <FileText className="h-4 w-4 text-gray-400" />

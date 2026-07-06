@@ -1,9 +1,20 @@
-import { useState, useRef, useEffect } from "react";
-import { useTheme, AISidebar, Button } from "@noffice/ui-core";
-import { Application, Graphics } from "pixi.js";
+import { AISidebar, Button, useTheme } from "@noffice/ui-core";
 import {
-  Brush, Eraser, Square, Circle, Type, Pipette, Droplets, Blend, Layers, Bot, Undo, Redo,
+  Blend,
+  Bot,
+  Brush,
+  Circle,
+  Droplets,
+  Eraser,
+  Layers,
+  Pipette,
+  Redo,
+  Square,
+  Type,
+  Undo,
 } from "lucide-react";
+import { Application, Graphics } from "pixi.js";
+import { useEffect, useRef, useState } from "react";
 
 const TOOLS = [
   { id: "brush", icon: Brush, label: "Brush" },
@@ -32,11 +43,11 @@ export function App() {
 
     async function init() {
       await app.init({
-        resizeTo: canvasRef.current!,
+        resizeTo: canvasRef.current as HTMLElement,
         background: "#ffffff",
         antialias: true,
       });
-      canvasRef.current!.appendChild(app.canvas);
+      canvasRef.current?.appendChild(app.canvas);
 
       const bg = new Graphics();
       bg.beginFill(0xffffff);
@@ -50,8 +61,12 @@ export function App() {
       app.stage.addChild(drawLayer);
 
       let isDrawing = false;
-      drawLayer.on("pointerdown", () => { isDrawing = true; });
-      drawLayer.on("pointerup", () => { isDrawing = false; });
+      drawLayer.on("pointerdown", () => {
+        isDrawing = true;
+      });
+      drawLayer.on("pointerup", () => {
+        isDrawing = false;
+      });
       drawLayer.on("pointermove", (e) => {
         if (!isDrawing) return;
         drawLayer.lineStyle(2, 0x000000, 1);
@@ -61,7 +76,10 @@ export function App() {
     }
     init();
 
-    return () => { app.destroy(true); appRef.current = null; };
+    return () => {
+      app.destroy(true);
+      appRef.current = null;
+    };
   }, []);
 
   return (
@@ -69,8 +87,12 @@ export function App() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="flex items-center justify-between border-b border-border px-4 py-2 dark:border-border-dark">
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon"><Undo className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon"><Redo className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon">
+              <Undo className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <Redo className="h-4 w-4" />
+            </Button>
           </div>
           <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(true)}>
             <Bot className="h-4 w-4" />
@@ -83,6 +105,7 @@ export function App() {
               const Icon = tool.icon;
               return (
                 <button
+                  type="button"
                   key={tool.id}
                   onClick={() => setActiveTool(tool.id)}
                   title={tool.label}
@@ -100,7 +123,11 @@ export function App() {
           <div ref={canvasRef} className="flex-1 overflow-hidden" />
         </div>
       </div>
-      <AISidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} appContext="nImg Image Editor" />
+      <AISidebar
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(false)}
+        appContext="nImg Image Editor"
+      />
     </div>
   );
 }
