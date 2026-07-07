@@ -12,6 +12,9 @@ pub struct AppConfig {
     pub model_quantization: String,
     pub ai_enabled: bool,
     pub document_dir: PathBuf,
+    pub license_key: String,
+    pub license_valid: bool,
+    pub license_email: String,
 }
 
 impl Default for AppConfig {
@@ -27,6 +30,9 @@ impl Default for AppConfig {
             model_quantization: "Q4_K_M".into(),
             ai_enabled: true,
             document_dir: dirs::document_dir().unwrap_or_default(),
+            license_key: String::new(),
+            license_valid: false,
+            license_email: String::new(),
         }
     }
 }

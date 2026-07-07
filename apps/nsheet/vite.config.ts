@@ -5,6 +5,7 @@ import path from "node:path";
 export default defineConfig({
   plugins: [react()],
   resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
+  base: "/nsheet/",
   server: { port: 5181, strictPort: true },
   build: { target: "esnext", minify: "esbuild" },
 });

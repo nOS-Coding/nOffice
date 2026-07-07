@@ -5,6 +5,7 @@ import path from "node:path";
 export default defineConfig({
   plugins: [react()],
   resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
+  base: "/nslides/",
   server: { port: 5182, strictPort: true },
   build: { target: "esnext", minify: "esbuild" },
 });

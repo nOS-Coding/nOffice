@@ -24,7 +24,7 @@ pub struct EmbeddingQueue {
 }
 
 impl EmbeddingQueue {
-    pub fn new() -> Self {
+    pub fn new() -> (Self, mpsc::Receiver<EmbeddingTask>) {
         let db_path = dirs::home_dir()
             .unwrap_or_default()
             .join(".noffice/embeddings");
@@ -33,13 +33,16 @@ impl EmbeddingQueue {
         let db = sled::open(&db_path).expect("Failed to open embedding database");
         let db = Arc::new(db);
 
-        let (sender, mut receiver) = mpsc::channel::<EmbeddingTask>(1024);
-        let db_clone = db.clone();
+        let (sender, receiver) = mpsc::channel::<EmbeddingTask>(1024);
 
-        tokio::spawn(async move {
+        (Self { sender, db }, receiver)
+    }
+
+    pub fn spawn_processor(rx: mpsc::Receiver<EmbeddingTask>, db: Arc<Db>) {
+        tauri::async_runtime::spawn(async move {
+            let mut receiver = rx;
             while let Some(task) = receiver.recv().await {
                 info!("Processing embedding task: {}", task.id);
-                // TODO: Actual embedding via llama.cpp embedding model
                 let mock_vector: Vec<f32> = vec![0.0; 4096];
                 let result = EmbeddingResult {
                     task_id: task.id,
@@ -48,12 +51,14 @@ impl EmbeddingQueue {
                 };
                 if let Ok(data) = serde_json::to_vec(&result) {
                     let key = format!("doc:{}", task.document_id);
-                    let _ = db_clone.insert(key.as_bytes(), data);
+                    let _ = db.insert(key.as_bytes(), data);
                 }
             }
         });
+    }
 
-        Self { sender, db }
+    pub fn db(&self) -> Arc<Db> {
+        self.db.clone()
     }
 
     pub async fn enqueue(&self, task: EmbeddingTask) -> Result<(), mpsc::error::SendError<EmbeddingTask>> {

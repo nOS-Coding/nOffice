@@ -2,12 +2,14 @@ import { type AIContextMode, AI_CONTEXT_MODES } from "@noffice/shared";
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   FileText,
   Globe,
   HelpCircle,
   Loader2,
   MessageCircle,
   Pencil,
+  Search,
   Send,
   Sparkles,
   Square,
@@ -27,6 +29,17 @@ const MODE_ICONS: Record<AIContextMode["id"], typeof MessageCircle> = {
   translate: Globe,
 };
 
+type AIStatus = "idle" | "installing" | "thinking" | "searching" | "generating" | "error";
+
+const COWORK_TOOLS = [
+  { id: "fix_grammar", label: "Fix Grammar", icon: Pencil, prompt: "Fix grammar and spelling in the text below. Return only the corrected text:" },
+  { id: "summarize", label: "Summarize", icon: FileText, prompt: "Summarize the following content concisely:" },
+  { id: "generate_code", label: "Generate Code", icon: Sparkles, prompt: "Generate code for the following request:" },
+  { id: "explain", label: "Explain", icon: HelpCircle, prompt: "Explain the following in simple terms:" },
+  { id: "translate_en", label: "Translate to EN", icon: Globe, prompt: "Translate the following to English:" },
+  { id: "web_search", label: "Search Web", icon: Search, prompt: "Search the web for information about:" },
+];
+
 interface AISidebarProps {
   isOpen: boolean;
   onToggle: () => void;
@@ -36,27 +49,45 @@ interface AISidebarProps {
 
 export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISidebarProps) {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>(
-    [],
-  );
+  const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
+  const [aiStatus, setAiStatus] = useState<AIStatus>("idle");
   const { isStreaming, content, mode, startStream, cancelStream, setMode } = useAIStream();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
+  }, [messages, content]);
 
   useEffect(() => {
     if (isOpen) inputRef.current?.focus();
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isStreaming) {
+      setAiStatus("generating");
+    } else if (aiStatus === "generating") {
+      setAiStatus("idle");
+    }
+  }, [isStreaming]);
 
   function handleSend() {
     if (!input.trim() || isStreaming) return;
     const userMsg = input.trim();
     setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
     setInput("");
+    setAiStatus("thinking");
     startStream(userMsg, mode.id);
+  }
+
+  function useCoworkTool(tool: (typeof COWORK_TOOLS)[number]) {
+    const context = selectedText || input || appContext || "";
+    if (!context.trim()) return;
+    const fullPrompt = `${tool.prompt}\n\n${context}`;
+    setMessages((prev) => [...prev, { role: "user", content: `${tool.label}: ${context.slice(0, 200)}` }]);
+    setInput("");
+    setAiStatus("thinking");
+    startStream(fullPrompt, mode.id);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -77,6 +108,17 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
       });
     }
   }, [content, isStreaming]);
+
+  const statusConfig: Record<AIStatus, { icon: typeof Loader2; text: string; color: string }> = {
+    idle: { icon: MessageCircle, text: "", color: "" },
+    installing: { icon: Download, text: "Installing AI model... (~4.5 GB)", color: "text-yellow-500" },
+    thinking: { icon: Loader2, text: "AI is thinking...", color: "text-brand-500" },
+    searching: { icon: Search, text: "Searching the web...", color: "text-blue-500" },
+    generating: { icon: Loader2, text: "Generating response...", color: "text-brand-500" },
+    error: { icon: X, text: "An error occurred", color: "text-red-500" },
+  };
+
+  const hasContext = !!(selectedText || input || appContext);
 
   return (
     <div
@@ -116,41 +158,60 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
           })}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 scrollbar-thin">
-          {messages.length === 0 && (
-            <div className="mt-8 text-center text-sm text-gray-400">
-              Ask me anything about your document
-              {appContext && <p className="mt-2 text-xs">Context: {appContext}</p>}
-            </div>
-          )}
-          {messages.map((msg, i) => (
-            <div
-              key={`${msg.role}-${i}`}
-              className={cn("mb-4", msg.role === "user" ? "text-right" : "text-left")}
-            >
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-4 scrollbar-thin">
+            {messages.length === 0 && (
+              <div className="mt-8 text-center text-sm text-gray-400">
+                Ask me anything about your document
+                {appContext && <p className="mt-2 text-xs">Context: {appContext}</p>}
+              </div>
+            )}
+            {messages.map((msg, i) => (
               <div
-                className={cn(
-                  "inline-block rounded-lg px-3 py-2 text-sm",
-                  msg.role === "user"
-                    ? "bg-brand-600 text-white"
-                    : "bg-surface-secondary dark:bg-surface-dark-secondary",
-                )}
+                key={`${msg.role}-${i}`}
+                className={cn("mb-4", msg.role === "user" ? "text-right" : "text-left")}
               >
-                {msg.content}
+                <div
+                  className={cn(
+                    "inline-block rounded-lg px-3 py-2 text-sm",
+                    msg.role === "user"
+                      ? "bg-brand-600 text-white"
+                      : "bg-surface-secondary dark:bg-surface-dark-secondary",
+                  )}
+                >
+                  {msg.content}
+                </div>
               </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="border-t border-border px-3 py-2 dark:border-border-dark">
+            <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-gray-400">
+              Cowork Tools
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {COWORK_TOOLS.map((tool) => {
+                const Icon = tool.icon;
+                return (
+                  <button
+                    key={tool.id}
+                    onClick={() => useCoworkTool(tool)}
+                    disabled={!hasContext || isStreaming}
+                    title={tool.prompt}
+                    className={cn(
+                      "flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors",
+                      "hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary",
+                      hasContext ? "text-gray-600 dark:text-gray-400" : "text-gray-300 dark:text-gray-600 cursor-not-allowed",
+                    )}
+                  >
+                    <Icon className="h-3 w-3" />
+                    {tool.label}
+                  </button>
+                );
+              })}
             </div>
-          ))}
-          {isStreaming && (
-            <div className="text-left">
-              <div className="inline-block rounded-lg bg-surface-secondary px-3 py-2 text-sm dark:bg-surface-dark-secondary">
-                <span className="inline-flex items-center gap-1">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Generating...
-                </span>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+          </div>
         </div>
 
         <div className="border-t border-border p-4 dark:border-border-dark">
@@ -159,6 +220,12 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
               <span className="font-medium">Selected: </span>
               {selectedText.slice(0, 100)}
               {selectedText.length > 100 ? "..." : ""}
+            </div>
+          )}
+          {aiStatus !== "idle" && (
+            <div className="mb-2 flex items-center gap-2 rounded-md bg-surface-secondary px-3 py-2 text-xs dark:bg-surface-dark-secondary">
+              <Loader2 className={cn("h-3 w-3 animate-spin", statusConfig[aiStatus].color)} />
+              <span className={statusConfig[aiStatus].color}>{statusConfig[aiStatus].text}</span>
             </div>
           )}
           <div className="flex gap-2">

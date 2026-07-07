@@ -2,11 +2,11 @@
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-cli/config.schema.json",
   "productName": "nOffice",
   "version": "2026.7.0",
-  "identifier": "com.noffice.app",
+  "identifier": "com.noffice.desktop",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:5173",
-    "beforeBuildCommand": "pnpm build",
+    "beforeBuildCommand": "pnpm build && node scripts/copy-sub-apps.mjs",
     "frontendDist": "../apps/noffice/dist"
   },
   "app": {
@@ -14,8 +14,8 @@
       {
         "label": "noffice",
         "title": "nOffice",
-        "width": 900,
-        "height": 650,
+        "width": 1100,
+        "height": 750,
         "resizable": true,
         "fullscreen": false,
         "center": true

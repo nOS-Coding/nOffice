@@ -23,6 +23,13 @@ export default defineConfig({
           port: 5174,
         }
       : undefined,
+    proxy: {
+      "/nwrite": { target: "http://localhost:5180", changeOrigin: true },
+      "/nsheet": { target: "http://localhost:5181", changeOrigin: true },
+      "/nslides": { target: "http://localhost:5182", changeOrigin: true },
+      "/nimg": { target: "http://localhost:5183", changeOrigin: true },
+      "/ncode": { target: "http://localhost:5184", changeOrigin: true },
+    },
     watch: {
       ignored: ["**/src-tauri/**"],
     },

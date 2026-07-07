@@ -54,8 +54,10 @@ export interface EmbeddingChunk {
   position: number;
 }
 
+export type ThemeOption = "light" | "dark" | "system" | "sepia" | "forest" | "ocean" | "midnight" | "solarized";
+
 export interface UserSettings {
-  theme: "light" | "dark" | "system";
+  theme: ThemeOption;
   fontSize: number;
   autoSave: boolean;
   autoSaveInterval: number;
@@ -63,6 +65,9 @@ export interface UserSettings {
   modelPath: string;
   modelQuantization: string;
   aiEnabled: boolean;
+  licenseKey: string;
+  licenseValid: boolean;
+  licenseEmail: string;
 }
 
 export interface WindowConfig {
@@ -151,7 +156,21 @@ export const DEFAULT_SETTINGS: UserSettings = {
   modelPath: "~/.noffice/models/qwen3-8b-q4_k_m.gguf",
   modelQuantization: "Q4_K_M",
   aiEnabled: true,
+  licenseKey: "",
+  licenseValid: false,
+  licenseEmail: "",
 };
+
+export const THEME_OPTIONS: { value: ThemeOption; label: string; desc: string }[] = [
+  { value: "system", label: "System", desc: "Follow system preference" },
+  { value: "light", label: "Light", desc: "Light background, dark text" },
+  { value: "dark", label: "Dark", desc: "Dark background, light text" },
+  { value: "sepia", label: "Sepia", desc: "Warm paper-like tones" },
+  { value: "forest", label: "Forest", desc: "Green-tinted, easy on eyes" },
+  { value: "ocean", label: "Ocean", desc: "Cool blue tones" },
+  { value: "midnight", label: "Midnight", desc: "Deep dark blue-black" },
+  { value: "solarized", label: "Solarized", desc: "Low contrast, scientific" },
+];
 
 export const AI_MODEL_INFO = {
   chat: {

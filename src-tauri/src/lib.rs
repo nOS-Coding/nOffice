@@ -17,16 +17,23 @@ pub struct AppState {
 pub fn run() {
     init_logging();
 
+    let (embedding_queue, embedding_rx) = ai::embedding::EmbeddingQueue::new();
+    let embedding_db = embedding_queue.db();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .setup(move |_app| {
+            ai::embedding::EmbeddingQueue::spawn_processor(embedding_rx, embedding_db);
+            Ok(())
+        })
         .manage(Arc::new(Mutex::new(AppState {
             config: AppConfig::load().unwrap_or_default(),
             ai: ai::manager::AiManager::new(),
-            embedding_queue: ai::embedding::EmbeddingQueue::new(),
+            embedding_queue,
         })))
         .invoke_handler(tauri::generate_handler![
             commands::ai::ai_start_stream,
