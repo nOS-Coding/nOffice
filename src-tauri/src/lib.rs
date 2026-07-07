@@ -47,6 +47,8 @@ pub fn run() {
             commands::document::get_recent_documents,
             commands::document::open_document,
             commands::document::save_document,
+            commands::export::export_html,
+            commands::export::export_txt,
         ])
         .run(tauri::generate_context!())
         .expect("nOffice failed to start");

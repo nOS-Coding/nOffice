@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 use tracing::info;
 
 #[tauri::command]
@@ -85,6 +85,24 @@ fn setup_app_menu(
             .build()?;
 
         _window.set_menu(menu)?;
+
+        // Handle menu events by emitting to the frontend
+        let w = _window.clone();
+        _window.on_menu_event(move |_win, event| {
+            let id = event.id();
+            let id_str = id.as_ref();
+            match id_str {
+                "close" | "minimize" => {
+                    let _ = w.hide();
+                }
+                "toggle-sidebar" => {
+                    let _ = w.emit("menu:toggle-sidebar", ());
+                }
+                _ => {
+                    let _ = w.emit("menu:action", id_str);
+                }
+            }
+        });
     }
 
     Ok(())

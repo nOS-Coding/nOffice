@@ -4,6 +4,7 @@ import {
   Bot,
   Bug,
   FileCode,
+  FilePlus,
   Files,
   Folder,
   FolderOpen,
@@ -13,7 +14,8 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import type { ThemeOption } from "@noffice/shared";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const DEFAULT_CODE = `// Welcome to nCode - AI-powered IDE
 function greet(name: string): string {
@@ -31,18 +33,20 @@ interface FileNode {
   language?: string;
 }
 
-const INITIAL_TREE: FileNode[] = [
-  {
-    name: "src",
-    type: "folder",
-    children: [
-      { name: "index.ts", type: "file", content: DEFAULT_CODE, language: "typescript" },
-      { name: "utils.ts", type: "file", content: "// Utility functions\n\nexport function add(a: number, b: number): number {\n  return a + b;\n}\n", language: "typescript" },
-    ],
-  },
-  { name: "index.html", type: "file", content: "<html><body><script src=\"src/index.ts\"></script></body></html>", language: "html" },
-  { name: "README.md", type: "file", content: "# nCode Project\n\nEdit and run your code here.", language: "markdown" },
-];
+function createInitialTree(): FileNode[] {
+  return [
+    {
+      name: "src",
+      type: "folder",
+      children: [
+        { name: "index.ts", type: "file", content: DEFAULT_CODE, language: "typescript" },
+        { name: "utils.ts", type: "file", content: "// Utility functions\n\nexport function add(a: number, b: number): number {\n  return a + b;\n}\n", language: "typescript" },
+      ],
+    },
+    { name: "index.html", type: "file", content: "<html><body><script src=\"src/index.ts\"></script></body></html>", language: "html" },
+    { name: "README.md", type: "file", content: "# nCode Project\n\nEdit and run your code here.", language: "markdown" },
+  ];
+}
 
 function flattenFiles(nodes: FileNode[], path = ""): { path: string; node: FileNode }[] {
   const result: { path: string; node: FileNode }[] = [];
@@ -74,24 +78,57 @@ export function App() {
   const [showExplorer, setShowExplorer] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
   const [language, setLanguage] = useState("typescript");
-  const [theme] = useState<"vs-dark" | "light">("vs-dark");
+  const { theme: appTheme } = useTheme();
+  const monacoRef = useRef<Parameters<OnMount>[1] | null>(null);
+  const monacoTheme: "vs-dark" | "light" = useMemo(() => {
+    if (appTheme === "system") {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "vs-dark" : "light";
+    }
+    const darkThemes: ThemeOption[] = ["dark", "midnight", "forest", "ocean"];
+    return darkThemes.includes(appTheme) ? "vs-dark" : "light";
+  }, [appTheme]);
+
+  useEffect(() => {
+    if (monacoRef.current) {
+      monacoRef.current.editor.setTheme(monacoTheme);
+    }
+  }, [monacoTheme]);
+
   const [code, setCode] = useState(DEFAULT_CODE);
   const [fileName, setFileName] = useState("index.ts");
-  const [fileTree, setFileTree] = useState<FileNode[]>(INITIAL_TREE);
+  const [fileTree, setFileTree] = useState<FileNode[]>(() => createInitialTree());
   const [activeFilePath, setActiveFilePath] = useState("src/index.ts");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{ path: string; line: string; lineNum: number }[]>([]);
   const [output, setOutput] = useState<string[]>([]);
   const [showOutput, setShowOutput] = useState(false);
   const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
-  useTheme();
 
-  const handleEditorMount: OnMount = useCallback((editor) => {
+  const handleEditorMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor;
+    monacoRef.current = monaco;
+    monaco.editor.setTheme(monacoTheme);
     editor.focus();
   }, []);
 
-  const allFiles = flattenFiles(fileTree);
+  const allFiles = useMemo(() => flattenFiles(fileTree), [fileTree]);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "f") {
+        e.preventDefault();
+        setShowSearch((prev) => {
+          if (prev) {
+            setSearchQuery("");
+            setSearchResults([]);
+          }
+          return !prev;
+        });
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   function openFile(path: string) {
     const found = allFiles.find((f) => f.path === path);
@@ -169,32 +206,112 @@ export function App() {
 
   function deleteFile(path: string) {
     const parts = path.split("/");
-    const name = parts.pop()!;
+    const targetName = parts[parts.length - 1];
+    if (!targetName) return;
     setFileTree((prev) => {
-      function removeFrom(nodes: FileNode[]): FileNode[] {
-        return nodes.filter((n) => {
-          if (n.name === name && n.type === "file") return false;
-          if (n.children) n.children = removeFrom(n.children);
-          return true;
-        });
+      function removeFrom(nodes: FileNode[], depth: number): FileNode[] {
+        return nodes.reduce<FileNode[]>((acc, n) => {
+          const nameAtDepth = parts[depth];
+          if (n.type === "file" && n.name === targetName && n.name === nameAtDepth) {
+            return acc;
+          }
+          if (n.children && n.name === nameAtDepth) {
+            const newChildren = removeFrom(n.children, depth + 1);
+            return [...acc, { ...n, children: newChildren }];
+          }
+          return [...acc, n];
+        }, []);
       }
-      return removeFrom(prev);
+      return removeFrom(prev, 0);
     });
+    if (activeFilePath === path) {
+      const remaining = allFiles.filter((f) => f.path !== path);
+      if (remaining.length > 0) {
+        openFile(remaining[0]!.path);
+      }
+    }
   }
 
-  function updateFileContent(path: string, content: string) {
-    setFileTree((prev) => {
-      function updateIn(nodes: FileNode[]): FileNode[] {
-        return nodes.map((n) => {
-          const fullPath = `${path}`;
-          if (n.type === "file" && fullPath.endsWith(n.name)) {
-            return { ...n, content };
+  function createNewFile() {
+    const name = window.prompt("File name:", "untitled.ts");
+    if (!name) return;
+    if (fileTree.some((n) => n.name === name)) {
+      window.alert(`A file or folder named "${name}" already exists.`);
+      return;
+    }
+    const lang = extToLang(name);
+    const newNode: FileNode = { name, type: "file", content: "", language: lang };
+    setFileTree((prev) => [...prev, newNode]);
+    setCode("");
+    setFileName(name);
+    setLanguage(lang);
+    setActiveFilePath(name);
+  }
+
+  function createFileInFolder(folderPath: string) {
+    const name = window.prompt("File name:", "untitled.ts");
+    if (!name) return;
+
+    function hasDuplicate(nodes: FileNode[], parts: string[], depth: number): boolean {
+      for (const n of nodes) {
+        if (n.type === "folder" && n.name === parts[depth]) {
+          if (depth === parts.length - 1) {
+            return n.children?.some((c) => c.name === name) ?? false;
           }
-          if (n.children) return { ...n, children: updateIn(n.children) };
+          if (n.children) return hasDuplicate(n.children, parts, depth + 1);
+        }
+      }
+      return false;
+    }
+
+    if (hasDuplicate(fileTree, folderPath.split("/"), 0)) {
+      window.alert(`A file named "${name}" already exists in this folder.`);
+      return;
+    }
+
+    const lang = extToLang(name);
+    const newNode: FileNode = { name, type: "file", content: "", language: lang };
+
+    setFileTree((prev) => {
+      function addTo(nodes: FileNode[], parts: string[], depth: number): FileNode[] {
+        return nodes.map((n) => {
+          if (n.type === "folder" && n.name === parts[depth] && depth === parts.length - 1) {
+            return { ...n, children: [...(n.children || []), newNode] };
+          }
+          if (n.children && n.name === parts[depth]) {
+            return { ...n, children: addTo(n.children, parts, depth + 1) };
+          }
           return n;
         });
       }
-      return updateIn(prev);
+      return addTo(prev, folderPath.split("/"), 0);
+    });
+
+    const fullPath = `${folderPath}/${name}`;
+    setCode("");
+    setFileName(name);
+    setLanguage(lang);
+    setActiveFilePath(fullPath);
+  }
+
+  function updateFileContent(path: string, content: string) {
+    const parts = path.split("/");
+    const targetName = parts[parts.length - 1];
+    if (!targetName) return;
+    setFileTree((prev) => {
+      function updateIn(nodes: FileNode[], depth: number): FileNode[] {
+        return nodes.map((n) => {
+          const nameAtDepth = parts[depth];
+          if (n.type === "file" && n.name === targetName && n.name === nameAtDepth) {
+            return { ...n, content };
+          }
+          if (n.children && n.name === nameAtDepth) {
+            return { ...n, children: updateIn(n.children, depth + 1) };
+          }
+          return n;
+        });
+      }
+      return updateIn(prev, 0);
     });
   }
 
@@ -216,9 +333,10 @@ export function App() {
     setSearchResults(results);
   }
 
-  function renderTree(nodes: FileNode[], depth = 0) {
+  function renderTree(nodes: FileNode[], depth = 0, parentPath = "") {
     return nodes.map((node) => {
       const paddingLeft = depth * 16 + 8;
+      const currentPath = parentPath ? `${parentPath}/${node.name}` : node.name;
       if (node.type === "folder") {
         return (
           <div key={node.name}>
@@ -227,9 +345,19 @@ export function App() {
               style={{ paddingLeft }}
             >
               <Folder className="h-3.5 w-3.5 text-yellow-500" />
-              <span className="font-medium text-gray-700 dark:text-gray-300">{node.name}</span>
+              <span className="flex-1 font-medium text-gray-700 dark:text-gray-300">{node.name}</span>
+              <button
+                className="shrink-0 rounded p-0.5 text-gray-400 hover:text-brand-500"
+                title={`New file in ${node.name}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  createFileInFolder(currentPath);
+                }}
+              >
+                <FilePlus className="h-3 w-3" />
+              </button>
             </div>
-            {node.children && renderTree(node.children, depth + 1)}
+            {node.children && renderTree(node.children, depth + 1, currentPath)}
           </div>
         );
       }
@@ -241,10 +369,7 @@ export function App() {
             isActive ? "bg-brand-50 text-brand-700 dark:bg-brand-900/20 dark:text-brand-300" : "text-gray-600 dark:text-gray-400"
           }`}
           style={{ paddingLeft }}
-          onClick={() => {
-            const path = allFiles.find((f) => f.node === node)?.path || node.name;
-            openFile(path);
-          }}
+          onClick={() => openFile(currentPath)}
         >
           <FileCode className="h-3.5 w-3.5 shrink-0 text-blue-400" />
           <span className="truncate flex-1">{node.name}</span>
@@ -252,8 +377,7 @@ export function App() {
             className="hidden shrink-0 rounded p-0.5 text-gray-400 hover:text-red-500 group-hover:block"
             onClick={(e) => {
               e.stopPropagation();
-              const path = allFiles.find((f) => f.node === node)?.path || node.name;
-              deleteFile(path);
+              deleteFile(currentPath);
             }}
           >
             <Trash2 className="h-3 w-3" />
@@ -273,6 +397,9 @@ export function App() {
             </Button>
             <Button variant="ghost" size="icon" onClick={loadFile}>
               <FolderOpen className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={createNewFile}>
+              <FilePlus className="h-4 w-4" />
             </Button>
             <Button variant="ghost" size="icon" onClick={saveFile}>
               <Files className="h-4 w-4" />
@@ -327,7 +454,21 @@ export function App() {
                   <div
                     key={i}
                     className="flex cursor-pointer gap-2 px-3 py-1.5 text-xs hover:bg-surface-tertiary dark:hover:bg-surface-dark-tertiary"
-                    onClick={() => openFile(r.path)}
+                    onClick={() => {
+                      openFile(r.path);
+                      setTimeout(() => {
+                        const editor = editorRef.current;
+                        if (!editor || !searchQuery) return;
+                        const model = editor.getModel();
+                        if (!model) return;
+                        const matches = model.findMatches(searchQuery, false, true, false, null, true);
+                        const first = matches[0];
+                        if (first) {
+                          editor.setSelection(first.range);
+                          editor.revealRangeInCenter(first.range);
+                        }
+                      }, 50);
+                    }}
                   >
                     <span className="shrink-0 text-brand-500">{r.path}:{r.lineNum}</span>
                     <span className="truncate text-gray-600 dark:text-gray-400">{r.line}</span>
@@ -352,7 +493,7 @@ export function App() {
               <Editor
                 height="100%"
                 language={language}
-                theme={theme}
+                theme={monacoTheme}
                 value={code}
                 onChange={(v) => {
                   setCode(v || "");

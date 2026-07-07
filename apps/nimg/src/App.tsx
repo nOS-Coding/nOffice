@@ -1,6 +1,6 @@
 import { AISidebar, useTheme } from "@noffice/ui-core";
 import {
-  Brush, Circle, Eraser, Minus, Square, Type, Undo2,
+  Brush, Circle, Eraser, Maximize2, Minus, Redo2, Square, Type, Undo2, ZoomIn, ZoomOut,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -29,8 +29,12 @@ export function App() {
   const [history, setHistory] = useState<ImageData[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [canvasSize] = useState({ width: 800, height: 600 });
+  const [zoom, setZoom] = useState(1);
   const textInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   useTheme();
+  const historyIndexRef = useRef(historyIndex);
+  historyIndexRef.current = historyIndex;
 
   const saveState = useCallback(() => {
     const canvas = canvasRef.current;
@@ -38,13 +42,13 @@ export function App() {
     if (!canvas || !ctx) return;
     const state = ctx.getImageData(0, 0, canvas.width, canvas.height);
     setHistory((prev) => {
-      const next = prev.slice(0, historyIndex + 1);
+      const next = prev.slice(0, historyIndexRef.current + 1);
       next.push(state);
       if (next.length > 50) next.shift();
       return next;
     });
     setHistoryIndex((prev) => Math.min(prev + 1, 49));
-  }, [historyIndex]);
+  }, []);
 
   const undo = useCallback(() => {
     if (historyIndex <= 0) return;
@@ -52,6 +56,18 @@ export function App() {
     const ctx = ctxRef.current;
     if (!canvas || !ctx) return;
     const newIndex = historyIndex - 1;
+    const imgData = history[newIndex];
+    if (!imgData) return;
+    ctx.putImageData(imgData, 0, 0);
+    setHistoryIndex(newIndex);
+  }, [historyIndex, history]);
+
+  const redo = useCallback(() => {
+    if (historyIndex >= history.length - 1) return;
+    const canvas = canvasRef.current;
+    const ctx = ctxRef.current;
+    if (!canvas || !ctx) return;
+    const newIndex = historyIndex + 1;
     const imgData = history[newIndex];
     if (!imgData) return;
     ctx.putImageData(imgData, 0, 0);
@@ -75,11 +91,36 @@ export function App() {
     saveState();
   }, [canvasSize]);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "z" || e.key === "Z")) {
+        e.preventDefault();
+        redo();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        exportPNG();
+      }
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (document.activeElement?.tagName === "INPUT") return;
+        if (window.confirm("Clear the canvas?")) {
+          clearCanvas();
+        }
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [undo, redo]);
+
   function getPos(e: React.MouseEvent<HTMLCanvasElement>): { x: number; y: number } {
     const rect = canvasRef.current!.getBoundingClientRect();
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: (e.clientX - rect.left) / zoom,
+      y: (e.clientY - rect.top) / zoom,
     };
   }
 
@@ -94,7 +135,9 @@ export function App() {
     }
     const ctx = ctxRef.current;
     if (!ctx) return;
-    ctx.strokeStyle = activeTool === "eraser" ? "#ffffff" : color;
+    ctx.strokeStyle = color;
+    if (activeTool === "eraser") ctx.globalCompositeOperation = "destination-out";
+    else ctx.globalCompositeOperation = "source-over";
     ctx.lineWidth = activeTool === "eraser" ? brushSize * 2 : brushSize;
     ctx.beginPath();
     ctx.moveTo(pos.x, pos.y);
@@ -107,9 +150,13 @@ export function App() {
     const pos = getPos(e);
     const imgData = history[historyIndex];
     if (!imgData) return;
-    ctx.strokeStyle = activeTool === "eraser" ? "#ffffff" : color;
+    ctx.strokeStyle = color;
+    if (activeTool === "eraser") ctx.globalCompositeOperation = "destination-out";
+    else ctx.globalCompositeOperation = "source-over";
     ctx.lineWidth = activeTool === "eraser" ? brushSize * 2 : brushSize;
     if (activeTool === "brush" || activeTool === "eraser") {
+      ctx.beginPath();
+      ctx.moveTo(lastPos.x, lastPos.y);
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
     } else if (activeTool === "line") {
@@ -181,6 +228,34 @@ export function App() {
     a.click();
   }
 
+  function importImage() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/png,image/jpg,image/jpeg,image/gif,image/webp";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = canvasRef.current;
+          const ctx = ctxRef.current;
+          if (!canvas || !ctx) return;
+          const x = (canvas.width - img.width) / 2;
+          const y = (canvas.height - img.height) / 2;
+          ctx.drawImage(img, x, y);
+          saveState();
+        };
+        if (typeof reader.result === "string") {
+          img.src = reader.result;
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  }
+
   return (
     <div className="flex h-screen">
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -243,10 +318,45 @@ export function App() {
             </button>
             <button
               className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary"
+              onClick={importImage}
+            >
+              Open Image
+            </button>
+            <div className="mx-1 h-4 w-px bg-border dark:bg-border-dark" />
+            <button
+              className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary"
+              onClick={() => setZoom((z) => Math.min(4, z + 0.25))}
+              disabled={zoom >= 4}
+            >
+              <ZoomIn className="inline h-3 w-3" />
+            </button>
+            <button
+              className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary"
+              onClick={() => setZoom((z) => Math.max(0.25, z - 0.25))}
+              disabled={zoom <= 0.25}
+            >
+              <ZoomOut className="inline h-3 w-3" />
+            </button>
+            <button
+              className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary"
+              onClick={() => setZoom(1)}
+            >
+              <Maximize2 className="inline h-3 w-3" /> {Math.round(zoom * 100)}%
+            </button>
+            <div className="mx-1 h-4 w-px bg-border dark:bg-border-dark" />
+            <button
+              className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary"
               onClick={undo}
               disabled={historyIndex <= 0}
             >
               <Undo2 className="inline h-3 w-3" /> Undo
+            </button>
+            <button
+              className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary"
+              onClick={redo}
+              disabled={historyIndex >= history.length - 1}
+            >
+              <Redo2 className="inline h-3 w-3" /> Redo
             </button>
           </div>
           <button
@@ -278,40 +388,48 @@ export function App() {
               );
             })}
           </div>
-          <div className="relative flex-1 overflow-hidden bg-surface-secondary dark:bg-surface-dark-secondary">
-            <canvas
-              ref={canvasRef}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-crosshair rounded-lg shadow-lg"
-              style={{ background: "#ffffff" }}
-              onMouseDown={startDraw}
-              onMouseMove={draw}
-              onMouseUp={endDraw}
-              onMouseLeave={endDraw}
-            />
-            {textInput && (
-              <div
-                className="absolute"
-                style={{ left: textInput.x + 8, top: textInput.y - 8 }}
-              >
-                <input
-                  ref={textInputRef}
-                  className="rounded border border-brand-500 bg-white px-2 py-1 text-sm outline-none shadow-lg"
-                  placeholder="Type text..."
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      addText(e.currentTarget.value);
-                    } else if (e.key === "Escape") {
-                      setTextInput(null);
-                    }
-                  }}
-                  onBlur={(e) => {
-                    if (e.currentTarget.value) addText(e.currentTarget.value);
-                    else setTextInput(null);
-                  }}
-                />
-              </div>
-            )}
+          <div
+            ref={containerRef}
+            className="relative flex-1 overflow-hidden bg-surface-secondary dark:bg-surface-dark-secondary"
+          >
+            <div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+              style={{ transform: `translate(-50%, -50%) scale(${zoom})` }}
+            >
+              <canvas
+                ref={canvasRef}
+                className="cursor-crosshair rounded-lg shadow-lg"
+                style={{ background: "#ffffff" }}
+                onMouseDown={startDraw}
+                onMouseMove={draw}
+                onMouseUp={endDraw}
+                onMouseLeave={endDraw}
+              />
+              {textInput && (
+                <div
+                  className="absolute z-10"
+                  style={{ left: textInput.x + 8, top: textInput.y - 8 }}
+                >
+                  <input
+                    ref={textInputRef}
+                    className="rounded border border-brand-500 bg-white px-2 py-1 text-sm outline-none shadow-lg"
+                    placeholder="Type text..."
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        addText(e.currentTarget.value);
+                      } else if (e.key === "Escape") {
+                        setTextInput(null);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (e.currentTarget.value) addText(e.currentTarget.value);
+                      else setTextInput(null);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

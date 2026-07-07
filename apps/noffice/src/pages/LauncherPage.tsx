@@ -28,7 +28,9 @@ export function LauncherPage({ onOpenSettings }: LauncherPageProps) {
   const [downloadProgress, setDownloadProgress] = useState<number>(0);
 
   useEffect(() => {
+    let cancelled = false;
     const unlisten = listen<{ stage: string; progress: number; message: string }>("ai:download:progress", (event) => {
+      if (cancelled) return;
       const { stage, progress } = event.payload;
       if (stage === "downloading") {
         setModelStatus("downloading");
@@ -39,20 +41,29 @@ export function LauncherPage({ onOpenSettings }: LauncherPageProps) {
       }
     });
 
-    invoke("ai_get_model_status")
-      .then((models: unknown) => {
-        const modelList = models as Array<{ name: string; is_loaded: boolean }>;
-        if (modelList.length > 0 && modelList[0]?.is_loaded) {
-          setModelStatus("ready");
-        } else {
-          setModelStatus("downloading");
-          setDownloadProgress(0);
-          invoke("ai_download_model").catch(() => {});
-        }
-      })
-      .catch(() => setModelStatus("error"));
+    function checkAndDownload() {
+      invoke("ai_get_model_status")
+        .then((models: unknown) => {
+          if (cancelled) return;
+          const modelList = models as Array<{ name: string; is_loaded: boolean }>;
+          if (modelList.length > 0 && modelList[0]?.is_loaded) {
+            setModelStatus("ready");
+          } else {
+            setModelStatus("downloading");
+            setDownloadProgress(0);
+            invoke("ai_download_model").catch(() => {
+              if (!cancelled) setModelStatus("error");
+            });
+          }
+        })
+        .catch(() => {
+          if (!cancelled) setModelStatus("error");
+        });
+    }
 
-    return () => { unlisten.then((f) => f()); };
+    checkAndDownload();
+
+    return () => { cancelled = true; unlisten.then((f) => f()); };
   }, []);
 
   function openApp(appId: string) {
@@ -112,13 +123,25 @@ export function LauncherPage({ onOpenSettings }: LauncherPageProps) {
              modelStatus === "error" ? "AI Error" : "Checking..."}
           </span>
         </div>
-        {modelStatus === "downloading" && downloadProgress > 0 && (
+        {modelStatus === "downloading" && (
           <div className="h-1.5 w-48 overflow-hidden rounded-full bg-surface-tertiary dark:bg-surface-dark-tertiary">
             <div
               className="h-full rounded-full bg-brand-500 transition-all duration-300"
-              style={{ width: `${downloadProgress}%` }}
+              style={{ width: `${Math.max(downloadProgress, 2)}%` }}
             />
           </div>
+        )}
+        {modelStatus === "error" && (
+          <button
+            className="mt-2 rounded-lg bg-brand-600 px-4 py-1.5 text-xs text-white hover:bg-brand-700 transition-colors"
+            onClick={() => {
+              setModelStatus("downloading");
+              setDownloadProgress(0);
+              invoke("ai_download_model").catch(() => setModelStatus("error"));
+            }}
+          >
+            Retry Download
+          </button>
         )}
       </div>
     </div>

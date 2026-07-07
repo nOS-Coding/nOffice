@@ -40,21 +40,24 @@ function createSlide(overrides?: Partial<Slide>): Slide {
   };
 }
 
-function SlideThumbnail({ slide }: { slide: Slide; index: number }) {
+const initialSlides: Slide[] = [
+  createSlide({ id: "1", title: "Title Slide", content: "Click to add subtitle", layout: "title" }),
+  createSlide({ id: "2", title: "Content Slide", content: "Add your content here", layout: "title-content" }),
+];
+
+function SlideThumbnail({ slide }: { slide: Slide }) {
   return (
     <div
       className="mb-1 h-14 rounded p-2 text-[8px] leading-tight"
       style={{ background: slide.bgColor || "#ffffff" }}
     >
-      {slide.layout === "blank" && slide.elements.length === 0 ? (
+      <div className="text-[7px] font-bold" style={{ color: "#000000" }}>{slide.title || "Untitled"}</div>
+      {slide.elements.length > 0 ? (
+        <div className="mt-0.5 text-[6px] text-gray-400">{slide.elements.length} element(s)</div>
+      ) : slide.layout === "blank" ? (
         <div className="flex h-full items-center justify-center text-gray-300">blank</div>
       ) : (
-        <>
-          <div className="mb-1 text-[7px] font-bold" style={{ color: "#000000" }}>{slide.title || "Untitled"}</div>
-          {slide.layout !== "title" && (
-            <div className="line-clamp-2 text-gray-400">{slide.content || "..."}</div>
-          )}
-        </>
+        <div className="line-clamp-2 text-gray-400">{(slide.content || "...").slice(0, 30)}</div>
       )}
     </div>
   );
@@ -74,15 +77,19 @@ function LayoutBadge({ layout }: { layout: SlideLayout }) {
   );
 }
 
+const TRANSITION_DURATION = 300;
+
 function PresentView({ slides, onClose }: { slides: Slide[]; onClose: () => void }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const slide = slides[currentIndex];
+  const slidesRef = useRef(slides);
+  slidesRef.current = slides;
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
+      const len = slidesRef.current.length;
       if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " ") {
         e.preventDefault();
-        setCurrentIndex((i) => Math.min(i + 1, slides.length - 1));
+        setCurrentIndex((i) => Math.min(i + 1, len - 1));
       } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
         e.preventDefault();
         setCurrentIndex((i) => Math.max(i - 1, 0));
@@ -92,8 +99,9 @@ function PresentView({ slides, onClose }: { slides: Slide[]; onClose: () => void
     }
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [slides.length, onClose]);
+  }, [onClose]);
 
+  const slide = slides[currentIndex];
   if (!slide) return null;
 
   return (
@@ -108,9 +116,11 @@ function PresentView({ slides, onClose }: { slides: Slide[]; onClose: () => void
       </div>
       <div className="flex flex-1 items-center justify-center p-12">
         <div
-          className="relative aspect-video w-full max-w-5xl rounded-2xl p-16 shadow-2xl"
-          style={{ background: slide.bgColor || "#ffffff" }}
+          key={slide.id}
+          className="relative aspect-video w-full max-w-5xl rounded-2xl p-16 shadow-2xl animate-fade-in"
+          style={{ background: slide.bgColor || "#ffffff", animation: `fadeIn ${TRANSITION_DURATION}ms ease` }}
         >
+          <style>{`@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }`}</style>
           <h1 className="mb-6 text-5xl font-bold" style={{ color: "#000000" }}>{slide.title}</h1>
           {slide.elements.map((el) => (
             <div
@@ -146,30 +156,124 @@ function PresentView({ slides, onClose }: { slides: Slide[]; onClose: () => void
   );
 }
 
+interface ResizeHandleProps {
+  onResize: (dx: number, dy: number) => void;
+}
+
+function ResizeHandle({ onResize }: ResizeHandleProps) {
+  const startRef = useRef<{ x: number; y: number } | null>(null);
+
+  function handleMouseDown(e: React.MouseEvent) {
+    e.stopPropagation();
+    startRef.current = { x: e.clientX, y: e.clientY };
+    function handleMove(ev: MouseEvent) {
+      if (!startRef.current) return;
+      onResize(ev.clientX - startRef.current.x, ev.clientY - startRef.current.y);
+      startRef.current = { x: ev.clientX, y: ev.clientY };
+    }
+    function handleUp() {
+      startRef.current = null;
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    }
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+  }
+
+  return (
+    <div
+      className="absolute bottom-0 right-0 z-20 h-3 w-3 cursor-se-resize rounded-sm bg-brand-500 border border-white"
+      onMouseDown={handleMouseDown}
+    />
+  );
+}
+
 export function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [presenting, setPresenting] = useState(false);
-  const [slides, setSlides] = useState<Slide[]>([
-    createSlide({ id: "1", title: "Title Slide", content: "Click to add subtitle", layout: "title" }),
-    createSlide({ id: "2", title: "Content Slide", content: "Add your content here", layout: "title-content" }),
-  ]);
+  const [slides, setSlides] = useState<Slide[]>(initialSlides);
   const [activeSlide, setActiveSlide] = useState("1");
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [elementTextColor, setElementTextColor] = useState("#000000");
   const [elementBgColor, setElementBgColor] = useState("transparent");
+  const [history, setHistory] = useState<Slide[][]>([initialSlides]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+  const historyIndexRef = useRef(0);
   const slideAreaRef = useRef<HTMLDivElement>(null);
   useTheme();
 
+  function saveToHistory(currentSlides: Slide[]) {
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(currentSlides);
+    if (newHistory.length > 50) newHistory.splice(0, newHistory.length - 50);
+    setHistory(newHistory);
+    const newIndex = newHistory.length - 1;
+    setHistoryIndex(newIndex);
+    historyIndexRef.current = newIndex;
+  }
+
+  function undo() {
+    if (historyIndex > 0) {
+      const newIdx = historyIndex - 1;
+      const slidesAtIdx = history[newIdx];
+      if (!slidesAtIdx) return;
+      setHistoryIndex(newIdx);
+      historyIndexRef.current = newIdx;
+      setSlides(slidesAtIdx);
+    }
+  }
+
+  function redo() {
+    if (historyIndex < history.length - 1) {
+      const newIdx = historyIndex + 1;
+      const slidesAtIdx = history[newIdx];
+      if (!slidesAtIdx) return;
+      setHistoryIndex(newIdx);
+      historyIndexRef.current = newIdx;
+      setSlides(slidesAtIdx);
+    }
+  }
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("nslides-data");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setSlides(parsed);
+          setHistory([parsed]);
+          setHistoryIndex(0);
+          historyIndexRef.current = 0;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load slides", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem("nslides-data", JSON.stringify(slides));
+      } catch (e) {
+        console.error("Failed to save slides", e);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [slides]);
+
   const addSlide = useCallback((layout?: SlideLayout) => {
+    saveToHistory(slides);
     const id = String(Date.now());
     setSlides((prev) => [...prev, createSlide({ id, layout: layout || "title-content" })]);
     setActiveSlide(id);
     setShowAddMenu(false);
-  }, []);
+  }, [slides]);
 
   const deleteSlide = useCallback((id: string) => {
+    saveToHistory(slides);
     setSlides((prev) => {
       const filtered = prev.filter((s) => s.id !== id);
       if (filtered.length === 0) return [createSlide()];
@@ -186,10 +290,12 @@ export function App() {
   }, [slides]);
 
   function updateSlide(id: string, patch: Partial<Slide>) {
+    saveToHistory(slides);
     setSlides((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
   }
 
   function addElement(type: SlideElement["type"]) {
+    saveToHistory(slides);
     const el: SlideElement = {
       id: String(Date.now()),
       type,
@@ -208,7 +314,8 @@ export function App() {
     setSelectedElement(el.id);
   }
 
-  function updateElement(elId: string, patch: Partial<SlideElement>) {
+  function updateElement(elId: string, patch: Partial<SlideElement>, skipHistory?: boolean) {
+    if (!skipHistory) saveToHistory(slides);
     setSlides((prev) => prev.map((s) => {
       if (s.id !== activeSlide) return s;
       return { ...s, elements: s.elements.map((e) => e.id === elId ? { ...e, ...patch } : e) };
@@ -217,6 +324,7 @@ export function App() {
 
   function handleElementMouseDown(e: React.MouseEvent, elId: string) {
     e.stopPropagation();
+    saveToHistory(slides);
     setSelectedElement(elId);
     const el = slides.find((s) => s.id === activeSlide)?.elements.find((e) => e.id === elId);
     if (el) {
@@ -231,19 +339,62 @@ export function App() {
     setSelectedElement(null);
   }
 
+  function handleResizeElement(elId: string, dx: number, dy: number) {
+    saveToHistory(slides);
+    setSlides((prev) => prev.map((s) => {
+      if (s.id !== activeSlide) return s;
+      return {
+        ...s,
+        elements: s.elements.map((e) =>
+          e.id === elId ? { ...e, width: Math.max(30, e.width + dx), height: Math.max(20, e.height + dy) } : e
+        ),
+      };
+    }));
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    const target = e.target as HTMLElement;
+    const isInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
+
+    if ((e.key === "Delete" || e.key === "Backspace") && !isInput) {
+      if (selectedElement) {
+        saveToHistory(slides);
+        setSlides((prev) => prev.map((s) => {
+          if (s.id !== activeSlide) return s;
+          return { ...s, elements: s.elements.filter((el) => el.id !== selectedElement) };
+        }));
+        setSelectedElement(null);
+      }
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+      if (e.shiftKey) {
+        e.preventDefault();
+        redo();
+      } else {
+        e.preventDefault();
+        undo();
+      }
+    }
+  }
+
   useEffect(() => {
     const start = dragStart;
     const sel = selectedElement;
     if (!start || !sel) return;
-    type Point = { x: number; y: number };
-    const startPos: Point = start;
-    const selId: string = sel;
+    const startPos = start;
+    const selId = sel;
     function handleMove(e: MouseEvent) {
       const dx = e.clientX - startPos.x;
       const dy = e.clientY - startPos.y;
       const el = slides.find((s) => s.id === activeSlide)?.elements.find((e) => e.id === selId);
       if (el) {
-        updateElement(selId, { x: el.x + dx, y: el.y + dy });
+        const slideEl = slideAreaRef.current?.querySelector(".aspect-video");
+        const slideWidth = slideEl?.clientWidth || 960;
+        const slideHeight = slideEl?.clientHeight || 540;
+        const newX = Math.max(0, Math.min(el.x + dx, slideWidth - el.width));
+        const newY = Math.max(0, Math.min(el.y + dy, slideHeight - el.height));
+        updateElement(selId, { x: newX, y: newY }, true);
         setDragStart({ x: e.clientX, y: e.clientY });
       }
     }
@@ -263,6 +414,7 @@ export function App() {
   function insertImage() {
     const url = window.prompt("Image URL");
     if (url) {
+      saveToHistory(slides);
       const el: SlideElement = {
         id: String(Date.now()),
         type: "image",
@@ -351,7 +503,7 @@ export function App() {
                       : "border-border hover:bg-surface-secondary dark:border-border-dark dark:hover:bg-surface-dark-secondary"
                   }`}
                 >
-                  <SlideThumbnail slide={slide} index={i} />
+                  <SlideThumbnail slide={slide} />
                   <p className="truncate font-medium" style={{ color: "#000000" }}>{slide.title || "Untitled"}</p>
                   <p className="text-[10px] text-gray-400">Slide {i + 1}</p>
                 </button>
@@ -414,24 +566,39 @@ export function App() {
                 }}
                 className="h-5 w-6 cursor-pointer rounded border-0 p-0"
               />
+              <div className="mx-2 h-4 w-px bg-border dark:bg-border-dark" />
+              <label className="text-[10px] text-gray-500">Slide Bg</label>
+              <input
+                type="color"
+                value={current?.bgColor || "#ffffff"}
+                onChange={(e) => updateSlide(activeSlide, { bgColor: e.target.value })}
+                className="h-5 w-6 cursor-pointer rounded border-0 p-0"
+              />
               {selectedElement && (
-                <button
-                  className="ml-auto rounded px-2 py-0.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  onClick={() => {
-                    updateSlide(activeSlide, {
-                      elements: (slides.find((s) => s.id === activeSlide)?.elements || []).filter((e) => e.id !== selectedElement),
-                    });
-                    setSelectedElement(null);
-                  }}
-                >
-                  Delete
-                </button>
+                <>
+                  <div className="mx-2 h-4 w-px bg-border dark:bg-border-dark" />
+                  <button
+                    className="rounded px-2 py-0.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    onClick={() => {
+                      saveToHistory(slides);
+                      setSlides((prev) => prev.map((s) => {
+                        if (s.id !== activeSlide) return s;
+                        return { ...s, elements: s.elements.filter((e) => e.id !== selectedElement) };
+                      }));
+                      setSelectedElement(null);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </>
               )}
             </div>
             <div
               ref={slideAreaRef}
               className="flex-1 overflow-y-auto bg-surface-secondary p-6 dark:bg-surface-dark-secondary"
               onClick={handleSlideClick}
+              onKeyDown={handleKeyDown}
+              tabIndex={0}
             >
               <div className="relative mx-auto aspect-video max-w-4xl rounded-2xl p-10 shadow-lg"
                 style={{ background: current?.bgColor || "#ffffff" }}
@@ -508,12 +675,16 @@ export function App() {
                         suppressContentEditableWarning
                         className="w-full h-full px-2 py-1 outline-none"
                         style={{ color: el.color }}
+                        onInput={(e) => updateElement(el.id, { content: e.currentTarget.textContent || "" })}
                         onBlur={(e) => updateElement(el.id, { content: e.currentTarget.textContent || "" })}
                       >
                         {el.content}
                       </div>
                     ) : (
                       <span style={{ color: el.color, fontSize: el.fontSize - 2 }}>{el.content}</span>
+                    )}
+                    {selectedElement === el.id && (
+                      <ResizeHandle onResize={(dx, dy) => handleResizeElement(el.id, dx, dy)} />
                     )}
                   </div>
                 ))}

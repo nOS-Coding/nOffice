@@ -1,5 +1,5 @@
 import { AISidebar, useTheme } from "@noffice/ui-core";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const COLS = 26;
 const ROWS = 100;
@@ -26,11 +26,27 @@ const FORMULA_FUNCTIONS: Record<string, { english: string; args: string; desc: s
   COUNT: { english: "COUNT", args: "number1; number2; ...", desc: "Counts numbers" },
   EĞER: { english: "IF", args: "koşul; doğruysa; yanlışsa", desc: "Koşula göre değer döndürür" },
   IF: { english: "IF", args: "condition; true_value; false_value", desc: "Returns value based on condition" },
+  MUTLAK: { english: "ABS", args: "sayı", desc: "Mutlak değer alır" },
+  ABS: { english: "ABS", args: "number", desc: "Absolute value" },
+  YUVARLA: { english: "ROUND", args: "sayı; basamak", desc: "Sayıyı belirtilen basamak sayısına yuvarlar" },
+  ROUND: { english: "ROUND", args: "number; digits", desc: "Rounds number to specified digits" },
+  BUGÜN: { english: "TODAY", args: "", desc: "Bugünün tarihini döndürür" },
+  TODAY: { english: "TODAY", args: "", desc: "Returns today's date" },
+  UZUNLUK: { english: "LEN", args: "metin", desc: "Metnin uzunluğunu döndürür" },
+  LEN: { english: "LEN", args: "text", desc: "Returns length of text" },
+  BÜYÜKHARF: { english: "UPPER", args: "metin", desc: "Metni büyük harfe çevirir" },
+  UPPER: { english: "UPPER", args: "text", desc: "Converts text to uppercase" },
+  KÜÇÜKHARF: { english: "LOWER", args: "metin", desc: "Metni küçük harfe çevirir" },
+  LOWER: { english: "LOWER", args: "text", desc: "Converts text to lowercase" },
+  VLOOKUP: { english: "VLOOKUP", args: "lookup_value; table_array; col_index; [range_lookup]", desc: "Looks up a value in the first column of a range and returns a value from the specified column" },
+  SUMIF: { english: "SUMIF", args: "range; criteria; sum_range", desc: "Sums cells based on a condition" },
+  COUNTIF: { english: "COUNTIF", args: "range; criteria", desc: "Counts cells based on a condition" },
 };
 
-function resolveCellValue(key: string, data: Record<string, string>): number {
+function resolveCellValue(key: string, data: Record<string, string | number>): number {
   const raw = data[key];
   if (raw === undefined || raw === "") return 0;
+  if (typeof raw === "number") return raw;
   const num = Number(raw);
   if (!isNaN(num)) return num;
   return 0;
@@ -81,17 +97,77 @@ function parseRange(rangeStr: string): string[] {
   const startMatch = part0.match(/^([A-Z]+)(\d+)$/);
   const endMatch = part1.match(/^([A-Z]+)(\d+)$/);
   if (!startMatch || !endMatch) return [rangeStr];
-  const startCol = (startMatch[1] as string).charCodeAt(0) - 65;
+  const colStrStart = startMatch[1]!;
+  let startCol = 0;
+  for (let j = 0; j < colStrStart.length; j++) {
+    startCol = startCol * 26 + (colStrStart.charCodeAt(j) - 64);
+  }
+  startCol--;
   const startRow = parseInt(startMatch[2] as string) - 1;
-  const endCol = (endMatch[1] as string).charCodeAt(0) - 65;
+  const colStrEnd = endMatch[1]!;
+  let endCol = 0;
+  for (let j = 0; j < colStrEnd.length; j++) {
+    endCol = endCol * 26 + (colStrEnd.charCodeAt(j) - 64);
+  }
+  endCol--;
   const endRow = parseInt(endMatch[2] as string) - 1;
   const cells: string[] = [];
-  for (let r = startRow; r <= endRow; r++) {
-    for (let c = startCol; c <= endCol; c++) {
+  for (let r = Math.min(startRow, endRow); r <= Math.max(startRow, endRow); r++) {
+    for (let c = Math.min(startCol, endCol); c <= Math.max(startCol, endCol); c++) {
       cells.push(`${String.fromCharCode(65 + c)}${r + 1}`);
     }
   }
   return cells;
+}
+
+function parseRangeAsGrid(rangeStr: string): string[][] {
+  const parts = rangeStr.split(":");
+  if (parts.length !== 2) return [[rangeStr]];
+  const part0 = parts[0]!;
+  const part1 = parts[1]!;
+  const startMatch = part0.match(/^([A-Z]+)(\d+)$/);
+  const endMatch = part1.match(/^([A-Z]+)(\d+)$/);
+  if (!startMatch || !endMatch) return [[rangeStr]];
+  const colToIdx = (s: string): number => {
+    let idx = 0;
+    for (let j = 0; j < s.length; j++) idx = idx * 26 + (s.charCodeAt(j) - 64);
+    return idx - 1;
+  };
+  const sc = colToIdx(startMatch[1]!);
+  const sr = parseInt(startMatch[2]!) - 1;
+  const ec = colToIdx(endMatch[1]!);
+  const er = parseInt(endMatch[2]!) - 1;
+  const rows: string[][] = [];
+  for (let r = Math.min(sr, er); r <= Math.max(sr, er); r++) {
+    const row: string[] = [];
+    for (let c = Math.min(sc, ec); c <= Math.max(sc, ec); c++) {
+      row.push(`${String.fromCharCode(65 + c)}${r + 1}`);
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
+function matchCriteria(cellValue: string | number, criteria: string): boolean {
+  const strVal = String(cellValue);
+  const cleaned = criteria.replace(/^"+|"+$/g, "");
+  const opMatch = cleaned.match(/^(>=|<=|<>|>|<|=)?(.+)$/);
+  if (!opMatch) return strVal === cleaned;
+  const op = opMatch[1];
+  const rest = opMatch[2] ?? "";
+  if (!op || op === "=") return strVal === rest;
+  const numVal = typeof cellValue === "number" ? cellValue : Number(strVal);
+  const isNum = !isNaN(numVal) && strVal !== "";
+  const critNum = Number(rest);
+  if (!isNum || isNaN(critNum)) return false;
+  switch (op) {
+    case ">": return numVal > critNum;
+    case "<": return numVal < critNum;
+    case ">=": return numVal >= critNum;
+    case "<=": return numVal <= critNum;
+    case "<>": return numVal !== critNum;
+    default: return strVal === rest;
+  }
 }
 
 function collectArgs(tokens: string[], start: number): { args: string[]; end: number } {
@@ -102,7 +178,11 @@ function collectArgs(tokens: string[], start: number): { args: string[]; end: nu
   while (i < tokens.length && depth > 0) {
     const tok = tokens[i];
     if (tok === "(") depth++;
-    else if (tok === ")") { depth--; if (depth === 0) break; }
+    else if (tok === ")") {
+      depth--;
+      if (depth > 0) current += tok;
+      if (depth === 0) break;
+    }
     if (tok === ";" && depth === 1) {
       args.push(current.trim());
       current = "";
@@ -116,22 +196,28 @@ function collectArgs(tokens: string[], start: number): { args: string[]; end: nu
   return { args, end: i };
 }
 
-function evalExpr(tokens: string[], start: number, end: number, data: Record<string, string>): { value: number; end: number } {
-  let result = 0;
-  let op = "+";
-  let i = start;
-  while (i < end) {
+function evalExpr(tokens: string[], start: number, end: number, data: Record<string, string | number>): { value: number; end: number } {
+  function parseExpr(pos: number, minPrec: number): { value: number; pos: number } {
+    let i = pos;
+    let left: number;
     const tok = tokens[i];
-    if (tok === undefined) break;
-    if (tok === "+" || tok === "-") { op = tok; i++; continue; }
-    let term: number;
-    if (tok === "(") {
-      const sub = evalExpr(tokens, i + 1, end, data);
-      term = sub.value;
-      i = sub.end + 1;
-    } else if (tok === "*" || tok === "/") {
-      op = tok; i++; continue;
-    } else if (!!tok && tok[0]! >= "A" && tok[0]! <= "Z") {
+    if (tok === undefined) return { value: 0, pos: i };
+    if (tok === "-") {
+      i++;
+      const sub = parseExpr(i, 3);
+      left = -sub.value;
+      i = sub.pos;
+    } else if (tok === "+") {
+      i++;
+      const sub = parseExpr(i, 3);
+      left = sub.value;
+      i = sub.pos;
+    } else if (tok === "(") {
+      const sub = parseExpr(i + 1, 0);
+      left = sub.value;
+      i = sub.pos;
+      if (tokens[i] === ")") i++;
+    } else if (tok.length > 0 && tok.charAt(0) >= "A" && tok.charAt(0) <= "Z") {
       const possibleFunc = tok.toUpperCase();
       const nextTok = tokens[i + 1];
       if (nextTok === "(" && FORMULA_FUNCTIONS[possibleFunc]) {
@@ -148,41 +234,152 @@ function evalExpr(tokens: string[], start: number, end: number, data: Record<str
           return sub.value;
         });
         const fn = possibleFunc;
-        if (fn === "TOPLA" || fn === "SUM") term = nums.reduce((s, n) => s + n, 0);
-        else if (fn === "ORTALAMA" || fn === "AVERAGE") term = nums.length ? nums.reduce((s, n) => s + n, 0) / nums.length : 0;
-        else if (fn === "MAK" || fn === "MAX") term = Math.max(...nums);
-        else if (fn === "MİN" || fn === "MIN") term = Math.min(...nums);
-        else if (fn === "SAY" || fn === "COUNT") term = nums.length;
-        else if (fn === "EĞER" || fn === "IF") term = nums[0] !== 0 ? nums[1] || 0 : nums[2] || 0;
-        else term = 0;
+        if (fn === "TOPLA" || fn === "SUM") left = nums.reduce((s, n) => s + n, 0);
+        else if (fn === "ORTALAMA" || fn === "AVERAGE") left = nums.length ? nums.reduce((s, n) => s + n, 0) / nums.length : 0;
+        else if (fn === "MAK" || fn === "MAX") left = Math.max(...nums);
+        else if (fn === "MİN" || fn === "MIN") left = Math.min(...nums);
+        else if (fn === "SAY" || fn === "COUNT") {
+          let count = 0;
+          for (const a of funcArgs) {
+            const trimmed = a.trim();
+            if (!trimmed) continue;
+            const cellMatch = trimmed.match(/^([A-Z]+)(\d+)$/);
+            if (cellMatch) {
+              const raw = data[trimmed];
+              if (raw !== undefined && raw !== "" && !isNaN(Number(raw))) count++;
+            } else if (trimmed.includes(":")) {
+              const rangeCells = parseRange(trimmed);
+              for (const c of rangeCells) {
+                const raw = data[c];
+                if (raw !== undefined && raw !== "" && !isNaN(Number(raw))) count++;
+              }
+            } else if (!isNaN(Number(trimmed))) {
+              count++;
+            }
+          }
+          left = count;
+        } else if (fn === "EĞER" || fn === "IF") left = (nums[0] ?? 0) !== 0 ? (nums[1] ?? 0) : (nums[2] ?? 0);
+        else if (fn === "MUTLAK" || fn === "ABS") left = Math.abs(nums[0] || 0);
+        else if (fn === "YUVARLA" || fn === "ROUND") {
+          const val = nums[0] || 0;
+          const digits = nums[1] || 0;
+          const factor = Math.pow(10, digits);
+          left = Math.round(val * factor) / factor;
+        }
+        else if (fn === "UZUNLUK" || fn === "LEN") {
+          const arg = (funcArgs[0] || "").trim();
+          const cellMatch = arg.match(/^([A-Z]+)(\d+)$/);
+          if (cellMatch) {
+            left = String(data[arg] ?? "").length;
+          } else {
+            left = arg.length;
+          }
+        }
+        else if (fn === "BUGÜN" || fn === "TODAY") {
+          left = Math.floor(Date.now() / 86400000);
+        }
+        else if (fn === "BÜYÜKHARF" || fn === "UPPER") {
+          const arg = (funcArgs[0] || "").trim();
+          const cellMatch = arg.match(/^([A-Z]+)(\d+)$/);
+          const str = cellMatch ? String(data[arg] ?? "") : arg;
+          left = parseFloat(str.toUpperCase()) || 0;
+        }
+        else if (fn === "KÜÇÜKHARF" || fn === "LOWER") {
+          const arg = (funcArgs[0] || "").trim();
+          const cellMatch = arg.match(/^([A-Z]+)(\d+)$/);
+          const str = cellMatch ? String(data[arg] ?? "") : arg;
+          left = parseFloat(str.toLowerCase()) || 0;
+        }
+        else if (fn === "VLOOKUP") {
+          const lookupArg = (funcArgs[0] || "").trim();
+          const tableRange = (funcArgs[1] || "").trim();
+          const colIdx = parseInt((funcArgs[2] || "").trim()) - 1;
+          const lookupCellMatch = lookupArg.match(/^([A-Z]+)(\d+)$/);
+          const lookupValue = lookupCellMatch ? String(data[lookupArg] ?? "") : lookupArg.replace(/^"+|"+$/g, "");
+          const grid = parseRangeAsGrid(tableRange);
+          let found = 0;
+          for (const r of grid) {
+            if (r.length > 0 && String(data[r[0]!] ?? "") === lookupValue) {
+              if (colIdx >= 0 && colIdx < r.length) found = resolveCellValue(r[colIdx]!, data);
+              break;
+            }
+          }
+          left = found;
+        }
+        else if (fn === "SUMIF") {
+          const checkRange = (funcArgs[0] || "").trim();
+          let criteria = (funcArgs[1] || "").trim();
+          const sumRange = (funcArgs[2] || "").trim();
+          const critCellMatch = criteria.match(/^([A-Z]+)(\d+)$/);
+          if (critCellMatch) criteria = String(data[criteria] ?? "");
+          const checkCells = parseRange(checkRange);
+          const sumCells = sumRange ? parseRange(sumRange) : checkCells;
+          let total = 0;
+          for (let i = 0; i < checkCells.length; i++) {
+            const cv = data[checkCells[i]!] ?? "";
+            if (matchCriteria(cv, criteria)) {
+              total += resolveCellValue(i < sumCells.length ? sumCells[i]! : checkCells[i]!, data);
+            }
+          }
+          left = total;
+        }
+        else if (fn === "COUNTIF") {
+          const checkRange = (funcArgs[0] || "").trim();
+          let criteria = (funcArgs[1] || "").trim();
+          const critCellMatch = criteria.match(/^([A-Z]+)(\d+)$/);
+          if (critCellMatch) criteria = String(data[criteria] ?? "");
+          const checkCells = parseRange(checkRange);
+          let count = 0;
+          for (const ck of checkCells) {
+            const cv = data[ck] ?? "";
+            if (matchCriteria(cv, criteria)) count++;
+          }
+          left = count;
+        }
+        else left = 0;
         i = funcEnd + 1;
       } else {
         const cellMatch = tok.match(/^([A-Z]+)(\d+)$/);
-        if (cellMatch) term = resolveCellValue(tok, data);
-        else term = 0;
+        if (cellMatch) left = resolveCellValue(tok, data);
+        else left = 0;
         i++;
       }
-    } else if (tok === "*") { i++; continue; }
-           else if (tok === "/") { i++; continue; }
-           else {
-      term = parseFloat(tok) || 0;
+    } else {
+      left = parseFloat(tok) || 0;
       i++;
     }
-    if (op === "+") result += term;
-    else if (op === "-") result -= term;
-    else if (op === "*") result *= term;
-    else if (op === "/" && term !== 0) result /= term;
-    op = "+";
+    while (i < end) {
+      const op = tokens[i];
+      if (op === undefined || op === ")" || op === "," || op === ";") break;
+      const prec = (op === "+" || op === "-") ? 1 : (op === "^") ? 3 : 2;
+      if (prec < minPrec) break;
+      i++;
+      const rhs = parseExpr(i, prec + 1);
+      i = rhs.pos;
+      if (op === "+") left += rhs.value;
+      else if (op === "-") left -= rhs.value;
+      else if (op === "*") left *= rhs.value;
+      else if (op === "/") left /= rhs.value;
+      else if (op === "^") left = Math.pow(left, rhs.value);
+    }
+    return { value: left, pos: i };
   }
-  return { value: result, end: i };
+  const result = parseExpr(start, 0);
+  return { value: result.value, end: result.pos };
 }
 
-function evaluateFormula(formula: string, data: Record<string, string>): string {
+function evaluateFormula(formula: string, data: Record<string, string | number>): string {
   if (!formula.startsWith("=")) return formula;
   const expr = formula.slice(1);
   const tokens = tokenize(expr);
   if (tokens.length === 0) return formula;
   try {
+    const fn0 = tokens[0];
+    if (fn0 && (fn0 === "BUGÜN" || fn0 === "TODAY")) {
+      if (tokens[1] === "(" && tokens[2] === ")" && tokens.length === 3) {
+        return new Date().toISOString().split("T")[0] ?? "";
+      }
+    }
     const result = evalExpr(tokens, 0, tokens.length, data);
     if (isNaN(result.value) || !isFinite(result.value)) return formula;
     return Number.isInteger(result.value) ? result.value.toString() : result.value.toFixed(2);
@@ -192,15 +389,20 @@ function evaluateFormula(formula: string, data: Record<string, string>): string 
 }
 
 function computeAllFormulas(data: Record<string, string>): Record<string, string> {
-  const display: Record<string, string> = {};
+  const display: Record<string, string | number> = {};
   for (const [key, value] of Object.entries(data)) {
     if (value.startsWith("=")) {
-      display[key] = evaluateFormula(value, data);
+      display[key] = evaluateFormula(value, display);
     } else {
-      display[key] = value;
+      const num = Number(value);
+      display[key] = isNaN(num) ? value : num;
     }
   }
-  return display;
+  const result: Record<string, string> = {};
+  for (const [key, value] of Object.entries(display)) {
+    result[key] = String(value);
+  }
+  return result;
 }
 
 function hasFormula(value: string): boolean {
@@ -223,7 +425,7 @@ function App() {
   const displayData = computeAllFormulas(data);
 
   function cellKey(col: number, row: number) {
-    return `${COL_LABELS[col]}${row + 1}`;
+    return `${COL_LABELS[col] ?? ""}${row + 1}`;
   }
 
   function getDisplayValue(key: string): string {
@@ -296,13 +498,102 @@ function App() {
       e.preventDefault();
       handleCellBlur();
       setActiveCell(cellKey(col + 1, row));
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      if (activeCell) setEditValue(data[activeCell] || "");
+      setEditing(false);
     }
+  }
+
+  function handleExportCsv() {
+    const rows: string[] = [];
+    for (let row = 0; row < ROWS; row++) {
+      const cols: string[] = [];
+      for (let col = 0; col < COLS; col++) {
+        const key = cellKey(col, row);
+        let val = getDisplayValue(key);
+        if (val.includes(",") || val.includes('"') || val.includes("\n") || val.includes("\r")) {
+          val = `"${val.replace(/"/g, '""')}"`;
+        }
+        cols.push(val);
+      }
+      rows.push(cols.join(","));
+    }
+    const csv = rows.join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "spreadsheet.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleSort(ascending: boolean) {
+    if (!activeCell) return;
+    const colMatch = activeCell.match(/^([A-Z]+)/);
+    if (!colMatch) return;
+    const colLetter = colMatch[1]!;
+    const rowEntries = Array.from({ length: ROWS }, (_, i) => ({
+      index: i,
+      value: getDisplayValue(`${colLetter}${i + 1}`),
+    }));
+    rowEntries.sort((a, b) => {
+      const an = Number(a.value);
+      const bn = Number(b.value);
+      const aIsNum = !isNaN(an) && a.value !== "";
+      const bIsNum = !isNaN(bn) && b.value !== "";
+      if (aIsNum && bIsNum) return ascending ? an - bn : bn - an;
+      if (a.value === "" && b.value === "") return 0;
+      if (a.value === "") return ascending ? 1 : -1;
+      if (b.value === "") return ascending ? -1 : 1;
+      const cmp = a.value.localeCompare(b.value);
+      return ascending ? cmp : -cmp;
+    });
+    setData((prev) => {
+      const next: Record<string, string> = {};
+      for (let c = 0; c < COLS; c++) {
+        const cl = COL_LABELS[c]!;
+        for (let nr = 0; nr < ROWS; nr++) {
+          const or = rowEntries[nr]!.index;
+          const src = `${cl}${or + 1}`;
+          const dst = `${cl}${nr + 1}`;
+          if (prev[src] !== undefined) next[dst] = prev[src]!;
+        }
+      }
+      return next;
+    });
   }
 
   const visibleCols = Math.ceil(window.innerWidth / COL_WIDTH);
   const visibleRows = Math.ceil(600 / ROW_HEIGHT);
 
   const activeFormula = activeCell && hasFormula(data[activeCell] || "");
+
+  useEffect(() => {
+    try {
+      const savedData = localStorage.getItem("nsheet-data");
+      const savedStyles = localStorage.getItem("nsheet-styles");
+      if (savedData) setData(JSON.parse(savedData));
+      if (savedStyles) setCellStyles(JSON.parse(savedStyles));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem("nsheet-data", JSON.stringify(data));
+      localStorage.setItem("nsheet-styles", JSON.stringify(cellStyles));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [data, cellStyles]);
+
+  useEffect(() => {
+    if (activeCell) {
+      setEditValue(data[activeCell] || "");
+    } else {
+      setEditValue("");
+    }
+  }, [activeCell]);
 
   return (
     <div className="flex h-screen flex-col">
@@ -357,7 +648,7 @@ function App() {
               <div className="cheatsheet-overlay" onClick={() => setShowCheatsheet(false)} />
               <div className="cheatsheet-panel right-0 top-full mt-1">
                 <p className="mb-2 text-xs font-semibold text-gray-500">Formulas</p>
-                {Object.entries(FORMULA_FUNCTIONS).filter(([k]) => k === k.toUpperCase() && !["SUM","AVERAGE","MAX","MIN","COUNT","IF"].includes(k)).map(([name, info]) => (
+                {Object.entries(FORMULA_FUNCTIONS).filter(([k]) => k === k.toUpperCase() && !["SUM","AVERAGE","MAX","MIN","COUNT","IF","ABS","ROUND","TODAY","LEN","UPPER","LOWER"].includes(k)).map(([name, info]) => (
                   <div key={name} className="mb-2 rounded bg-gray-50 p-2 dark:bg-surface-dark-tertiary">
                     <code className="text-sm font-bold text-brand-600">={name}({info.args})</code>
                     <p className="text-xs text-gray-500 mt-0.5">{info.desc}</p>
@@ -387,6 +678,27 @@ function App() {
             className="h-5 w-6 cursor-pointer rounded border-0 p-0"
           />
         </div>
+        <button
+          className="rounded px-2 py-1 text-xs font-medium text-gray-500 hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary"
+          onClick={handleExportCsv}
+          title="Export as CSV"
+        >
+          Export CSV
+        </button>
+        <button
+          className="rounded px-2 py-1 text-xs font-medium text-gray-500 hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary"
+          onClick={() => handleSort(true)}
+          title="Sort A-Z"
+        >
+          Sort A-Z
+        </button>
+        <button
+          className="rounded px-2 py-1 text-xs font-medium text-gray-500 hover:bg-surface-secondary dark:hover:bg-surface-dark-secondary"
+          onClick={() => handleSort(false)}
+          title="Sort Z-A"
+        >
+          Sort Z-A
+        </button>
         <div className="ml-auto flex items-center gap-1">
           <span className="rounded px-2 py-0.5 text-[11px] font-medium text-gray-500 bg-surface-tertiary dark:bg-surface-dark-tertiary">
             Sheet 1

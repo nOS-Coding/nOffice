@@ -1,8 +1,11 @@
-name: Build
+name: Build & Release
 
 on:
   push:
     tags: ["v*"]
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 env:
   CARGO_TERM_COLOR: always
@@ -10,7 +13,28 @@ env:
   NODE_VERSION: "20"
 
 jobs:
+  lint:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install
+      - name: TypeScript check
+        run: pnpm build 2>&1 | tail -5
+
   build:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [lint]
     strategy:
       fail-fast: false
       matrix:
@@ -48,11 +72,28 @@ jobs:
         with:
           target: ${{ matrix.target }}
 
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ${{ matrix.target }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+
       - name: Install dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libgtk-3-dev libayatana-appindicator3-dev
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            libjavascriptcoregtk-4.1-dev \
+            libsoup-3.0-dev
 
       - name: Install pnpm dependencies
         run: pnpm install
@@ -67,7 +108,23 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "nOffice ${{ github.ref_name }}"
-          releaseBody: "See the assets to download this version."
+          releaseBody: |
+            ## nOffice ${{ github.ref_name }}
+
+            ### Changes
+            - All apps: document persistence, keyboard shortcuts, bug fixes
+            - nWrite: font size, text color, code/blockquote/link/task buttons
+            - nSheet: fixed formula operator precedence, IF/COUNT functions, new formulas (ABS, ROUND, TODAY, LEN, UPPER, LOWER)
+            - nSlides: slide reorder, duplicate, undo/redo, keyboard shortcuts
+            - nImg: image import, zoom controls, keyboard shortcuts
+            - nCode: immutable state, factory tree, memoized file list
+            - AI: fixed streaming race condition, error display, markdown rendering
+            - Security: path traversal fix, CSP enabled, Tauri capabilities configured
+
+            ### Downloads
+            - **macOS**: `.dmg` (Apple Silicon + Intel)
+            - **Windows**: `.msi` + `.exe`
+            - **Linux**: `.AppImage` + `.deb`
           releaseDraft: false
           prerelease: false
           args: --target ${{ matrix.target }}

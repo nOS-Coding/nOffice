@@ -47,7 +47,6 @@ export function useAIStream(options: UseAIStreamOptions = {}): UseAIStreamReturn
         const unlisten = await import("@tauri-apps/api/event");
 
         const streamId = crypto.randomUUID();
-        await invoke("ai_start_stream", { prompt, modeId: m.id, streamId });
 
         const cleanup = await unlisten.listen<AIStreamChunk>(`ai:stream:${streamId}`, (event) => {
           const chunk = event.payload;
@@ -64,6 +63,8 @@ export function useAIStream(options: UseAIStreamOptions = {}): UseAIStreamReturn
             options.onDone?.();
           }
         });
+
+        await invoke("ai_start_stream", { prompt, modeId: m.id, streamId });
 
         abortRef.current = new AbortController();
         abortRef.current.signal.addEventListener("abort", () => {

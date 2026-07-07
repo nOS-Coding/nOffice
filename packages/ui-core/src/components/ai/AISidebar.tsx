@@ -51,7 +51,7 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
   const [aiStatus, setAiStatus] = useState<AIStatus>("idle");
-  const { isStreaming, content, mode, startStream, cancelStream, setMode } = useAIStream();
+  const { isStreaming, content, mode, startStream, cancelStream, setMode, error } = useAIStream();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -118,16 +118,24 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
     error: { icon: X, text: "An error occurred", color: "text-red-500" },
   };
 
+  function renderMarkdown(text: string): string {
+    return text
+      .replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-100 dark:bg-gray-800 p-2 rounded text-xs my-1 overflow-x-auto"><code>$1</code></pre>')
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
+      .replace(/\n\n/g, "<br><br>");
+  }
+
   const hasContext = !!(selectedText || input || appContext);
 
   return (
     <div
       className={cn(
         "relative flex h-full flex-col border-l border-border bg-surface transition-all duration-300 dark:border-border-dark dark:bg-surface-dark",
-        isOpen ? "w-[var(--sidebar-width)]" : "w-0 overflow-hidden",
+        isOpen ? "w-80 max-w-full" : "w-0 overflow-hidden",
       )}
     >
-      <div className="flex h-full min-w-[var(--sidebar-width)] flex-col">
+      <div className="flex h-full min-w-80 flex-col">
         <div className="flex items-center justify-between border-b border-border px-4 py-3 dark:border-border-dark">
           <span className="text-sm font-semibold">AI Assistant</span>
           <Button variant="ghost" size="icon" onClick={onToggle}>
@@ -179,7 +187,11 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
                       : "bg-surface-secondary dark:bg-surface-dark-secondary",
                   )}
                 >
-                  {msg.content}
+                  {msg.role === "assistant" ? (
+                    <span dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+                  ) : (
+                    msg.content
+                  )}
                 </div>
               </div>
             ))}
@@ -213,6 +225,12 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
             </div>
           </div>
         </div>
+
+        {error && (
+          <div className="mx-3 mb-2 rounded-md bg-red-50 px-3 py-2 text-xs text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            {error}
+          </div>
+        )}
 
         <div className="border-t border-border p-4 dark:border-border-dark">
           {selectedText && (
