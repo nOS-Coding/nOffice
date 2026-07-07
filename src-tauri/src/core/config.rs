@@ -12,6 +12,8 @@ pub struct AppConfig {
     pub model_path: PathBuf,
     pub model_quantization: String,
     pub ai_enabled: bool,
+    #[serde(default)]
+    pub model_downloaded: bool,
     pub document_dir: PathBuf,
     pub license_key: String,
     pub license_valid: bool,
@@ -30,6 +32,7 @@ impl Default for AppConfig {
                 .join(".noffice/models/qwen3-8b-q4_k_m.gguf"),
             model_quantization: "Q4_K_M".into(),
             ai_enabled: true,
+            model_downloaded: false,
             document_dir: dirs::document_dir().unwrap_or_default(),
             license_key: String::new(),
             license_valid: false,

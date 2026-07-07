@@ -2259,14 +2259,18 @@ checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 
 [[package]]
 name = "noffice"
-version = "2026.7.1"
+version = "2026.7.0"
 dependencies = [
  "anyhow",
  "dirs",
+ "futures-util",
+ "hex",
  "hf-hub",
  "llama-cpp-2",
+ "reqwest 0.12.28",
  "serde",
  "serde_json",
+ "sha2",
  "sled",
  "tauri",
  "tauri-build",

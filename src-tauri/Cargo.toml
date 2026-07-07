@@ -1,6 +1,6 @@
 [package]
 name = "noffice"
-version = "2026.7.1"
+version = "2026.7.0"
 description = "nOffice - Cross-platform office suite with local AI"
 authors = ["nOffice Team"]
 edition = "2021"
@@ -32,6 +32,10 @@ anyhow = "1"
 thiserror = "2"
 uuid = { version = "1", features = ["v4"] }
 dirs = "6"
+reqwest = { version = "0.12", features = ["stream"] }
+sha2 = "0.10"
+hex = "0.4"
+futures-util = "0.3"
 
 [features]
 default = ["custom-protocol"]

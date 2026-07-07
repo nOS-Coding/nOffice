@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nOffice vs Industry — Feature Comparison</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--sans:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;--mono:'SF Mono','Fira Code','Cascadia Code',monospace;--bg:#0d0d0f;--surface:#151518;--border:#232327;--text:#c8c8cc;--text-dim:#6b6b74;--text-bright:#f0f0f4;--accent:#4c6ef5;--accent-subtle:rgba(76,110,245,.12);--green:#2fb86e;--red:#e5534b;--amber:#dba11c;--radius:8px}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);padding:2rem 1rem;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1{text-align:center;font-size:2rem;font-weight:600;color:var(--text-bright);margin-bottom:.25rem}
+.sub{text-align:center;color:var(--text-dim);font-size:.875rem;margin-bottom:2.5rem}
+h2{font-size:1.25rem;font-weight:600;color:var(--text-bright);margin:3rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.section-header{display:flex;align-items:center;gap:10px;margin:3rem 0 1rem}
+.section-header h2{margin:0;border:0;padding:0}
+.section-header .icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.iw{background:#2563eb}
+.is{background:#16a34a}
+.ip{background:#d97706}
+.iimg{background:#7c3aed}
+.ic{background:#0891b2}
+table{width:100%;border-collapse:collapse;font-size:.8125rem;margin-bottom:1rem;border-radius:var(--radius);overflow:hidden}
+th{background:var(--surface);padding:10px 12px;text-align:left;font-weight:600;color:var(--text-bright);white-space:nowrap;border-bottom:2px solid var(--border)}
+th:first-child{width:32%}
+th:nth-child(2){width:34%}
+th:nth-child(3){width:34%}
+td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:var(--accent-subtle)}
+td:first-child{font-weight:500;color:var(--text-bright)}
+.tag{display:inline-block;font-size:.6875rem;padding:1px 7px;border-radius:4px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.yes{background:rgba(47,184,110,.15);color:var(--green)}
+.partial{background:rgba(219,161,28,.15);color:var(--amber)}
+.no{background:rgba(229,83,75,.15);color:var(--red)}
+.feature-group{font-weight:600;color:var(--text-dim);font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;padding:14px 12px 6px!important;background:var(--surface)}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:2rem}
+.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem}
+.summary-card h3{font-size:.875rem;font-weight:600;color:var(--text-bright);margin-bottom:.5rem}
+.summary-card .stat{font-size:1.75rem;font-weight:700;color:var(--accent)}
+.summary-card .stat-label{font-size:.75rem;color:var(--text-dim);margin-top:.125rem}
+.summary-card .note{font-size:.75rem;color:var(--text-dim);margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--border)}
+.summary-card .note .tag{font-size:.625rem;padding:0 5px;margin-right:2px}
+.wide{grid-column:1/-1}
+footer{text-align:center;margin-top:4rem;padding-top:2rem;border-top:1px solid var(--border);font-size:.75rem;color:var(--text-dim)}
+footer a{color:var(--accent);text-decoration:none}
+.count{font-size:.6875rem;color:var(--text-dim);margin-left:6px;font-weight:400}
+</style>
+</head>
+<body>
+
+<h1>nOffice vs Industry</h1>
+<p class="sub">Feature comparison: nWrite &rarr; Word &middot; nSheet &rarr; Excel &middot; nSlides &rarr; PowerPoint &middot; nImg &rarr; Paint+Canva &middot; nCode &rarr; VS Code</p>
+
+<div class="summary-grid">
+  <div class="summary-card">
+    <h3>nWrite <span class="count">v2026.7</span></h3>
+    <div class="stat">~80%</div>
+    <div class="stat-label">of Word feature set</div>
+    <div class="note">Remaining: track changes, TOC, mail merge, footnotes, section breaks, multi-column, columns, VBA macros, real-time collaboration</div>
+  </div>
+  <div class="summary-card">
+    <h3>nSheet <span class="count">v2026.7</span></h3>
+    <div class="stat">~70%</div>
+    <div class="stat-label">of Excel feature set</div>
+    <div class="note">Remaining: pivot tables, 450+ formulas, named ranges, array formulas, circular detection, data validation, VBA, power query</div>
+  </div>
+  <div class="summary-card">
+    <h3>nSlides <span class="count">v2026.7</span></h3>
+    <div class="stat">~85%</div>
+    <div class="stat-label">of PowerPoint feature set</div>
+    <div class="note">Remaining: video/audio, SmartArt, 40+ more transitions, morph, 3D models, export PPTX, presenter pen, freeform shapes</div>
+  </div>
+  <div class="summary-card">
+    <h3>nImg <span class="count">v2026.7</span></h3>
+    <div class="stat">~75%</div>
+    <div class="stat-label">of Paint + Canva feature set</div>
+    <div class="note">Remaining: templates/stickers library, collaborative editing, cloud sync, spray can, curve/polygon tool, 95% of Canva's template catalog</div>
+  </div>
+  <div class="summary-card">
+    <h3>nCode <span class="count">v2026.7</span></h3>
+    <div class="stat">~75%</div>
+    <div class="stat-label">of VS Code feature set</div>
+    <div class="note">Remaining: extension marketplace, integrated terminal, full Git UI, LSP-powered IntelliSense, debugger, multi-root workspaces, settings sync</div>
+  </div>
+  <div class="summary-card wide">
+    <h3>Key advantages <span class="count">not in Microsoft/Canva/VS Code</span></h3>
+    <div class="stat" style="font-size:1rem;color:var(--green)">21 MB suite, zero telemetry, fully offline AI, MIT license</div>
+    <div class="stat-label">nOffice ships as a single 21 MB binary with 5 apps + local AI (model downloaded separately). No account. No cloud. No tracking.</div>
+  </div>
+</div>
+
+<!-- ==================== nWrite vs Word ==================== -->
+<div class="section-header"><div class="icon iw">W</div><h2>nWrite vs Microsoft Word</h2></div>
+<table>
+<tr><th>Category</th><th>nWrite</th><th>Microsoft Word</th></tr>
+<tr><td colspan="3" class="feature-group">Document Editing</td></tr>
+<tr><td>Rich text formatting (bold, italic, underline, strikethrough)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Font family selector (8 fonts)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Font size (8-72pt via dropdown)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Text color picker</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Highlight / background color</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Superscript / Subscript</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Spell check (browser built-in)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">Paragraph &amp; Layout</td></tr>
+<tr><td>Headings (H1-H6)</td><td><span class="tag partial">H1-H3</span></td><td><span class="tag yes">H1-H9</span></td></tr>
+<tr><td>Text alignment (left/center/right/justify)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Line spacing selector (1-3)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Bullet / Numbered lists</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Multi-level lists (sink/lift)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Indent / Outdent</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Page margins / size / orientation</td><td><span class="tag yes">A4/Letter/Legal</span></td><td><span class="tag yes">Full control</span></td></tr>
+<tr><td>Columns (multi-column layout)</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Page breaks / section breaks</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">Advanced Features</td></tr>
+<tr><td>Tables (insert + add/remove rows/cols)</td><td><span class="tag yes">Full</span></td><td><span class="tag yes">Full</span></td></tr>
+<tr><td>Images (insert from file)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Hyperlinks (insert + edit + remove)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Find &amp; Replace (with highlights)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Word count / Document statistics</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Track Changes / Comments</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Table of Contents</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Footnotes / Endnotes</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Headers / Footers / Page numbers</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Mail Merge</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Macros / VBA</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Document templates</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">Export &amp; Interop</td></tr>
+<tr><td>Export to PDF</td><td><span class="tag yes">Print dialog</span></td><td><span class="tag yes">Native</span></td></tr>
+<tr><td>Export to HTML</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Export to TXT</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Export to DOCX</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Export to ODT</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Collaboration (real-time)</td><td><span class="tag no">No</span></td><td><span class="tag yes">Co-authoring</span></td></tr>
+<tr><td colspan="3" class="feature-group">AI Features</td></tr>
+<tr><td>AI assistant (chat, rewrite, summarize, explain, translate, generate)</td><td><span class="tag yes">6 modes, local</span></td><td><span class="tag partial">Copilot (cloud)</span></td></tr>
+<tr><td>AI runs fully offline</td><td><span class="tag yes">Yes</span></td><td><span class="tag no">No</span></td></tr>
+<tr><td>Zero telemetry / no account required</td><td><span class="tag yes">Yes</span></td><td><span class="tag no">No</span></td></tr>
+<tr><td colspan="3" class="feature-group">Platform &amp; Size</td></tr>
+<tr><td>Binary size (per app share)</td><td><span class="tag">~4 MB</span></td><td><span class="tag">~3 GB</span></td></tr>
+<tr><td>RAM usage (idle)</td><td><span class="tag">~80 MB</span></td><td><span class="tag">~200 MB</span></td></tr>
+<tr><td>Suite total install size</td><td><span class="tag">21 MB</span></td><td><span class="tag">~6 GB</span></td></tr>
+</table>
+
+<!-- ==================== nSheet vs Excel ==================== -->
+<div class="section-header"><div class="icon is">S</div><h2>nSheet vs Microsoft Excel</h2></div>
+<table>
+<tr><th>Category</th><th>nSheet</th><th>Microsoft Excel</th></tr>
+<tr><td colspan="3" class="feature-group">Core Engine</td></tr>
+<tr><td>Formula evaluation (recursive descent parser)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Cell references (A1 style, including AA+ cols)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">A1 + R1C1</span></td></tr>
+<tr><td>Operator precedence (PEMDAS + power ^)</td><td><span class="tag yes">Correct</span></td><td><span class="tag yes">Correct</span></td></tr>
+<tr><td>Circular reference detection</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Array formulas (dynamic arrays)</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Named ranges</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">Formula Library</td></tr>
+<tr><td>Math (SUM, AVERAGE, MIN, MAX, COUNT, MOD, INT, POWER, RAND, RANDBETWEEN, ABS, ROUND)</td><td><span class="tag yes">12 math</span></td><td><span class="tag yes">50+ math</span></td></tr>
+<tr><td>Conditional (IF, SUMIF, COUNTIF)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">SUMIFS, COUNTIFS, etc.</span></td></tr>
+<tr><td>Lookup (VLOOKUP)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">VLOOKUP + XLOOKUP</span></td></tr>
+<tr><td>Text (LEN, UPPER, LOWER, CONCAT, TRIM, TEXT)</td><td><span class="tag yes">6 text</span></td><td><span class="tag yes">50+ text</span></td></tr>
+<tr><td>Date (TODAY, DATE, YEAR, MONTH, DAY)</td><td><span class="tag yes">5 date</span></td><td><span class="tag yes">20+ date</span></td></tr>
+<tr><td>Logical (AND, OR, NOT)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Financial (PMT, FV, NPV, IRR)</td><td><span class="tag no">No</span></td><td><span class="tag yes">50+ financial</span></td></tr>
+<tr><td>Statistical (STDEV, VAR, etc.)</td><td><span class="tag no">No</span></td><td><span class="tag yes">100+ statistical</span></td></tr>
+<tr><td>Engineering / Database</td><td><span class="tag no">No</span></td><td><span class="tag yes">60+ combined</span></td></tr>
+<tr><td>Total formula count</td><td><span class="tag">~30</span></td><td><span class="tag">~480</span></td></tr>
+<tr><td colspan="3" class="feature-group">Data &amp; Analysis</td></tr>
+<tr><td>Sort (ascending / descending per column)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Multi-level</span></td></tr>
+<tr><td>Filter / AutoFilter (column dropdowns, value checkboxes)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Conditional formatting (&gt;, &lt;, =, contains with colors)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Advanced rules</span></td></tr>
+<tr><td>Charts (bar, line, pie via SVG)</td><td><span class="tag yes">3 types</span></td><td><span class="tag yes">20+ chart types</span></td></tr>
+<tr><td>Pivot tables</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Data validation / dropdowns</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Freeze panes (rows, cols, both)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">UI &amp; Interaction</td></tr>
+<tr><td>Cell merging (colspan/rowspan)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Auto-fill (drag handle, increment series)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Multiple sheets (tabs, add/rename/delete)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Unlimited</span></td></tr>
+<tr><td>Row / Column insert / delete (shift data)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Column / Row resize (drag handles)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Right-click context menu (copy, paste, insert, delete, clear)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Undo / Redo (100 levels)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">100 levels</span></td></tr>
+<tr><td>Find &amp; Replace (find next, replace, replace all)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">Export</td></tr>
+<tr><td>CSV export (with proper escaping)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>XLSX export (via SheetJS)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>ODS export</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Grid size</td><td><span class="tag">26 &times; 100</span></td><td><span class="tag">1M &times; 16K</span></td></tr>
+</table>
+
+<!-- ==================== nSlides vs PowerPoint ==================== -->
+<div class="section-header"><div class="icon ip">P</div><h2>nSlides vs Microsoft PowerPoint</h2></div>
+<table>
+<tr><th>Category</th><th>nSlides</th><th>Microsoft PowerPoint</th></tr>
+<tr><td colspan="3" class="feature-group">Slides &amp; Layout</td></tr>
+<tr><td>Add / Delete / Duplicate slides</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Slide reorder (up/down arrows)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Drag + arrows</span></td></tr>
+<tr><td>Slide layouts (title, blank, two-column, title-content)</td><td><span class="tag yes">4 layouts</span></td><td><span class="tag yes">20+ layouts</span></td></tr>
+<tr><td>Master slides / theme inheritance</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Background color per slide</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Gradients + patterns</span></td></tr>
+<tr><td>Slide numbering toggle</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">Elements</td></tr>
+<tr><td>Text boxes (contentEditable with spell check)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Shapes (rectangle, circle)</td><td><span class="tag yes">2 shapes</span></td><td><span class="tag yes">100+ shapes</span></td></tr>
+<tr><td>Images (file upload via file picker)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">File + online</span></td></tr>
+<tr><td>Charts (bar, line, pie via SVG)</td><td><span class="tag yes">3 types</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Tables (insert, editable cells, resize)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Video / Audio</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>SmartArt / Diagrams</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Resize handles on elements</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Drag to move elements</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Arrow keys to nudge (1px, Shift+10px)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Align (left, center, right, top, middle, bottom) + distribute</td><td><span class="tag yes">8 actions</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">Animation &amp; Transition</td></tr>
+<tr><td>Slide transitions (fade, slide, zoom, wipe, dissolve + duration control)</td><td><span class="tag yes">7 types</span></td><td><span class="tag yes">50+ transitions</span></td></tr>
+<tr><td>Element animations (fade, slide, bounce, zoom, rotate + delay/duration)</td><td><span class="tag yes">6 types</span></td><td><span class="tag yes">Extensive</span></td></tr>
+<tr><td>Transition timing / triggers</td><td><span class="tag partial">Duration only</span></td><td><span class="tag yes">Full control</span></td></tr>
+<tr><td colspan="3" class="feature-group">Presentation</td></tr>
+<tr><td>Present mode (fullscreen, keyboard nav)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Speaker notes / Presenter view (toggle overlay)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Dual monitor</span></td></tr>
+<tr><td>Pen / Laser pointer during presentation</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">Export &amp; Tools</td></tr>
+<tr><td>Export to PDF (via html2canvas + jsPDF)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Export to PPTX / ODP</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Undo / Redo (50 levels)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">150 levels</span></td></tr>
+<tr><td>localStorage persistence (auto-save)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">AutoSave (cloud)</span></td></tr>
+<tr><td>Spell check (browser built-in on text elements)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+</table>
+
+<!-- ==================== nImg vs Paint + Canva ==================== -->
+<div class="section-header"><div class="icon iimg">I</div><h2>nImg vs MS Paint + Canva</h2></div>
+<table>
+<tr><th>Category</th><th>nImg</th><th>MS Paint + Canva</th></tr>
+<tr><td colspan="3" class="feature-group">Drawing Tools</td></tr>
+<tr><td>Freehand brush (variable size, round cap)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Eraser (true alpha compositing)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Shapes (rect, circle, line)</td><td><span class="tag yes">3 shapes</span></td><td><span class="tag yes">Both (10+)</span></td></tr>
+<tr><td>Fill / Paint bucket (flood fill with tolerance)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Paint</span></td></tr>
+<tr><td>Color picker / Eyedropper</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Spray can / Airbrush</td><td><span class="tag no">No</span></td><td><span class="tag yes">Paint</span></td></tr>
+<tr><td>Curve / Polygon tool</td><td><span class="tag no">No</span></td><td><span class="tag yes">Paint</span></td></tr>
+<tr><td colspan="3" class="feature-group">Selection &amp; Manipulation</td></tr>
+<tr><td>Rectangular selection with marching ants</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Move / Copy / Paste / Cut selection</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Crop (8 resize handles, apply/cancel)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Rotate (90 CW/CCW) / Flip (H/V)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Resize / Skew</td><td><span class="tag no">No</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td colspan="3" class="feature-group">Layers &amp; Effects</td></tr>
+<tr><td>Layers (add, delete, duplicate, reorder, visibility toggle, opacity slider)</td><td><span class="tag yes">Full</span></td><td><span class="tag partial">Canva only</span></td></tr>
+<tr><td>Filters (blur, sharpen, emboss, invert, grayscale, sepia)</td><td><span class="tag yes">6 filters</span></td><td><span class="tag yes">Canva</span></td></tr>
+<tr><td>Adjustments (brightness, contrast, hue, saturation)</td><td><span class="tag no">No</span></td><td><span class="tag yes">Canva</span></td></tr>
+<tr><td colspan="3" class="feature-group">Text &amp; Typography</td></tr>
+<tr><td>Text tool (add text to canvas)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Font family selection (5 fonts)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Canva (1000+)</span></td></tr>
+<tr><td>Font size control (8-200px)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Bold / Italic / Underline</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Canva</span></td></tr>
+<tr><td>Text box resize / rotate</td><td><span class="tag no">No</span></td><td><span class="tag yes">Canva</span></td></tr>
+<tr><td colspan="3" class="feature-group">Templates &amp; Assets</td></tr>
+<tr><td>Pre-made templates</td><td><span class="tag no">No</span></td><td><span class="tag yes">Canva (500k+)</span></td></tr>
+<tr><td>Stock photos / Elements library</td><td><span class="tag no">No</span></td><td><span class="tag yes">Canva (100M+)</span></td></tr>
+<tr><td>Stickers / Emoji</td><td><span class="tag no">No</span></td><td><span class="tag yes">Canva</span></td></tr>
+<tr><td>Brand kits / color palettes</td><td><span class="tag no">No</span></td><td><span class="tag yes">Canva</span></td></tr>
+<tr><td colspan="3" class="feature-group">Import &amp; Export</td></tr>
+<tr><td>Import image (PNG, JPG, etc. via file picker)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Export as PNG</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Export as JPEG / WEBP / BMP</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Export as PDF / SVG</td><td><span class="tag no">No</span></td><td><span class="tag yes">Canva</span></td></tr>
+<tr><td colspan="3" class="feature-group">Canvas &amp; View</td></tr>
+<tr><td>Canvas size (custom width/height)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both (custom)</span></td></tr>
+<tr><td>Zoom (25%-400% with CSS scale)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Grid overlay (dashed, configurable interval)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Rulers (top + left pixel markings)</td><td><span class="tag no">No</span></td><td><span class="tag yes">Both</span></td></tr>
+<tr><td>Undo / Redo (100 levels)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Both (50+ levels)</span></td></tr>
+<tr><td colspan="3" class="feature-group">Collaboration</td></tr>
+<tr><td>Real-time collaborative editing</td><td><span class="tag no">No</span></td><td><span class="tag yes">Canva</span></td></tr>
+<tr><td>Cloud sync / Save to cloud</td><td><span class="tag no">No</span></td><td><span class="tag yes">Canva</span></td></tr>
+<tr><td>Share with link / permissions</td><td><span class="tag no">No</span></td><td><span class="tag yes">Canva</span></td></tr>
+</table>
+
+<!-- ==================== nCode vs VS Code ==================== -->
+<div class="section-header"><div class="icon ic">C</div><h2>nCode vs Visual Studio Code</h2></div>
+<table>
+<tr><th>Category</th><th>nCode</th><th>Visual Studio Code</th></tr>
+<tr><td colspan="3" class="feature-group">Editor Core</td></tr>
+<tr><td>Syntax highlighting (Monaco-native, 40+ langs)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Monaco-based</span></td></tr>
+<tr><td>Multi-file tabs with close, modified dot, LRU eviction (max 20)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Tabs + splits</span></td></tr>
+<tr><td>Minimap (toggleable) / Code folding / Bracket matching</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Multi-cursor / Selection</td><td><span class="tag yes">Monaco native</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Auto-indentation / Format on paste</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Font / Ligatures / Tab size settings (configurable panel)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Fully configurable</span></td></tr>
+<tr><td>Word wrap toggle</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Status bar (file, Ln/Col, language, encoding, indent)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Breadcrumb bar (root &gt; folder &gt; file)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">File Management</td></tr>
+<tr><td>File tree / Explorer</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>File create / delete / rename (F2, inline edit)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">All + move</span></td></tr>
+<tr><td>Folder creation (nested within folders)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Full tree mgmt</span></td></tr>
+<tr><td>Open file from disk (native dialog)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Save file to disk (native Tauri dialog)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Direct write</span></td></tr>
+<tr><td>Drag-and-drop file reorder</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Right-click context menu (new file/folder, rename, delete, duplicate)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">Search</td></tr>
+<tr><td>In-editor find (Monaco native Ctrl+F)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Find across files (debounced, results list, click to open)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Full global search</span></td></tr>
+<tr><td>Find &amp; Replace across files</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Search with regex / case sensitivity</td><td><span class="tag partial">Monaco built-in</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">IntelliSense &amp; Language</td></tr>
+<tr><td>Autocomplete / IntelliSense (Monaco built-in)</td><td><span class="tag partial">Basic</span></td><td><span class="tag yes">LSP-powered</span></td></tr>
+<tr><td>Go to definition / Find references</td><td><span class="tag no">No</span></td><td><span class="tag yes">LSP-powered</span></td></tr>
+<tr><td>Error squiggles / Diagnostics</td><td><span class="tag no">No</span></td><td><span class="tag yes">LSP-powered</span></td></tr>
+<tr><td>Code actions / Quick fixes</td><td><span class="tag no">No</span></td><td><span class="tag yes">LSP-powered</span></td></tr>
+<tr><td>Hover information / Signature help</td><td><span class="tag no">No</span></td><td><span class="tag yes">LSP-powered</span></td></tr>
+<tr><td>Language auto-detection (40+ file extensions)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Language selector (dropdown + status bar)</td><td><span class="tag yes">Both</span></td><td><span class="tag yes">Status bar</span></td></tr>
+<tr><td>Supported languages</td><td><span class="tag">40+ (Monaco)</span></td><td><span class="tag">100+ (extensions)</span></td></tr>
+<tr><td colspan="3" class="feature-group">Debugging &amp; Run</td></tr>
+<tr><td>Run code (eval + mock console output)</td><td><span class="tag yes">JavaScript only</span></td><td><span class="tag yes">Multiple runtimes</span></td></tr>
+<tr><td>Debugger (breakpoints, step, watch, variables)</td><td><span class="tag partial">debugger; only</span></td><td><span class="tag yes">Full debugger</span></td></tr>
+<tr><td>Integrated terminal</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Output panel (read-only, run results)</td><td><span class="tag yes">Yes</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Problems panel / Error list</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">Source Control</td></tr>
+<tr><td>Git status indicators (modified files)</td><td><span class="tag yes">Basic dots</span></td><td><span class="tag yes">Full Git UI</span></td></tr>
+<tr><td>Diff / Stage / Commit</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>SCM providers</td><td><span class="tag no">No</span></td><td><span class="tag yes">Extensible</span></td></tr>
+<tr><td>Diff editor (side-by-side)</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td colspan="3" class="feature-group">Extensions &amp; Customization</td></tr>
+<tr><td>Extension marketplace</td><td><span class="tag no">No</span></td><td><span class="tag yes">50k+ extensions</span></td></tr>
+<tr><td>Settings panel (font size, tab size, word wrap, minimap, theme)</td><td><span class="tag yes">5 settings</span></td><td><span class="tag yes">Hundreds</span></td></tr>
+<tr><td>Command palette (Ctrl+Shift+P, searchable commands)</td><td><span class="tag yes">7 commands</span></td><td><span class="tag yes">Thousands</span></td></tr>
+<tr><td>Keybinding customization</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Workspace / Multi-root workspaces</td><td><span class="tag no">No</span></td><td><span class="tag yes">Yes</span></td></tr>
+<tr><td>Theme customization (dark/light via system)</td><td><span class="tag yes">App-driven</span></td><td><span class="tag yes">100+ themes</span></td></tr>
+<tr><td colspan="3" class="feature-group">AI Features</td></tr>
+<tr><td>AI assistant (chat, explain, refactor, generate)</td><td><span class="tag yes">6 modes, local</span></td><td><span class="tag partial">Copilot (cloud)</span></td></tr>
+<tr><td>Inline code completions</td><td><span class="tag no">No</span></td><td><span class="tag yes">Copilot</span></td></tr>
+<tr><td>AI runs fully offline</td><td><span class="tag yes">Yes</span></td><td><span class="tag no">No</span></td></tr>
+<tr><td colspan="3" class="feature-group">Platform</td></tr>
+<tr><td>Binary size (app only)</td><td><span class="tag">~4 MB share</span></td><td><span class="tag">~100 MB + extensions</span></td></tr>
+<tr><td>RAM usage (idle)</td><td><span class="tag">~60 MB</span></td><td><span class="tag">~400 MB</span></td></tr>
+<tr><td>Suite install size (all 5 apps)</td><td><span class="tag">21 MB</span></td><td><span class="tag">~500 MB (w/ extensions)</span></td></tr>
+</table>
+
+<!-- ==================== Suite Architecture ==================== -->
+<div class="section-header" style="margin-top:4rem"><div class="icon" style="background:var(--accent)">A</div><h2>Suite Architecture</h2></div>
+<table>
+<tr><th>Feature</th><th>nOffice</th><th>Competitors</th></tr>
+<tr><td colspan="3" class="feature-group">Application Model</td></tr>
+<tr><td>Window model</td><td><span class="tag yes">Single window, unified shell</span></td><td><span class="tag">Separate windows per app</span></td></tr>
+<tr><td>App switching</td><td><span class="tag yes">Sidebar dock with icons</span></td><td><span class="tag">Taskbar / Alt+Tab</span></td></tr>
+<tr><td>Cross-app AI sidebar</td><td><span class="tag yes">Shared overlay, any app</span></td><td><span class="tag">Per-app assistants</span></td></tr>
+<tr><td>Unified settings</td><td><span class="tag yes">Single settings page</span></td><td><span class="tag">Per-app settings</span></td></tr>
+<tr><td>iframe embedding</td><td><span class="tag yes">All sub-apps in one window</span></td><td><span class="tag na">N/A</span></td></tr>
+<tr><td>Cross-app postMessage bridge</td><td><span class="tag yes">Theme, AI, settings sync</span></td><td><span class="tag na">N/A</span></td></tr>
+<tr><td colspan="3" class="feature-group">AI Platform</td></tr>
+<tr><td>Model download/management</td><td><span class="tag yes">In-app with progress</span></td><td><span class="tag">Separate installers</span></td></tr>
+<tr><td>AI access from all apps</td><td><span class="tag yes">Shared sidebar</span></td><td><span class="tag">Per-app Copilot</span></td></tr>
+<tr><td>Offline AI</td><td><span class="tag yes">Fully offline (Qwen3 8B)</span></td><td><span class="tag no">Cloud-only (Copilot)</span></td></tr>
+<tr><td colspan="3" class="feature-group">Performance</td></tr>
+<tr><td>Total binary size (all apps)</td><td><span class="tag">21 MB</span></td><td><span class="tag">~10-15 GB</span></td></tr>
+<tr><td>RAM per app (idle)</td><td><span class="tag">~60-80 MB</span></td><td><span class="tag">~200-600 MB</span></td></tr>
+<tr><td>Cross-platform</td><td><span class="tag yes">macOS, Windows, Linux</span></td><td><span class="tag yes">Same + Web</span></td></tr>
+<tr><td colspan="3" class="feature-group">Licensing &amp; Privacy</td></tr>
+<tr><td>License</td><td><span class="tag yes">MIT (free)</span></td><td><span class="tag no">Proprietary ($)</span></td></tr>
+<tr><td>Telemetry</td><td><span class="tag yes">Zero telemetry</span></td><td><span class="tag no">Telemetry by default</span></td></tr>
+<tr><td>Account required</td><td><span class="tag yes">No account needed</span></td><td><span class="tag no">Microsoft/Google/Canva account</span></td></tr>
+<tr><td>Model bundle option</td><td><span class="tag partial">Separate download</span></td><td><span class="tag na">N/A (cloud)</span></td></tr>
+</table>
+
+<footer>
+  Generated from <a href="https://github.com/nOS-Coding/nOffice">nOffice</a> &mdash; Feature data reflects v2026.7.0.
+</footer>
+
+</body>
+</html>

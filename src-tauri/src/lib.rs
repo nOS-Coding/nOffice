@@ -7,6 +7,7 @@ use core::config::AppConfig;
 use core::logging::init_logging;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tracing::{error, info};
 
 pub struct AppState {
     pub config: AppConfig,
@@ -26,8 +27,19 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .setup(move |_app| {
+        .setup(move |app| {
             ai::embedding::EmbeddingQueue::spawn_processor(embedding_rx, embedding_db);
+
+            // Check for bundled model on first launch
+            let app_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                match ai::manager::AiManager::check_bundled_model(&app_handle).await {
+                    Ok(true) => info!("Bundled model deployed successfully"),
+                    Ok(false) => info!("No bundled model found, download will be prompted on use"),
+                    Err(e) => error!("Failed to check bundled model: {}", e),
+                }
+            });
+
             Ok(())
         })
         .manage(Arc::new(Mutex::new(AppState {
@@ -41,6 +53,8 @@ pub fn run() {
             commands::ai::ai_get_model_status,
             commands::ai::ai_download_model,
             commands::ai::ai_list_models,
+            commands::ai::ai_start_download,
+            commands::ai::ai_check_model_status,
             commands::window::open_app_window,
             commands::config::get_config,
             commands::config::set_config,

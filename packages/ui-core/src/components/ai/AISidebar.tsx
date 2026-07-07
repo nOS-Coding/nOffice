@@ -31,6 +31,8 @@ const MODE_ICONS: Record<AIContextMode["id"], typeof MessageCircle> = {
 
 type AIStatus = "idle" | "installing" | "thinking" | "searching" | "generating" | "error";
 
+type ModelStatus = "checking" | "prompt" | "downloading" | "ready" | "error";
+
 const COWORK_TOOLS = [
   { id: "fix_grammar", label: "Fix Grammar", icon: Pencil, prompt: "Fix grammar and spelling in the text below. Return only the corrected text:" },
   { id: "summarize", label: "Summarize", icon: FileText, prompt: "Summarize the following content concisely:" },
@@ -47,10 +49,26 @@ interface AISidebarProps {
   selectedText?: string;
 }
 
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${units[i]}`;
+}
+
+function formatSpeed(bytesPerSec: number): string {
+  return `${formatBytes(bytesPerSec)}/s`;
+}
+
 export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISidebarProps) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
   const [aiStatus, setAiStatus] = useState<AIStatus>("idle");
+  const [modelStatus, setModelStatus] = useState<ModelStatus>("checking");
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [downloadSpeed, setDownloadSpeed] = useState(0);
+  const [downloadedBytes, setDownloadedBytes] = useState(0);
+  const [totalBytes, setTotalBytes] = useState(0);
   const { isStreaming, content, mode, startStream, cancelStream, setMode, error } = useAIStream();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -70,6 +88,57 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
       setAiStatus("idle");
     }
   }, [isStreaming]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkModel() {
+      try {
+        const { invoke } = await import("@tauri-apps/api/core");
+        const { listen } = await import("@tauri-apps/api/event");
+
+        const unlistenProgress = await listen<{
+          type: string;
+          bytesDownloaded: number;
+          totalBytes: number;
+          speed: number;
+          progress: number;
+        }>("ai:download:progress", (event) => {
+          if (cancelled) return;
+          setModelStatus("downloading");
+          setDownloadProgress(event.payload.progress);
+          setDownloadSpeed(event.payload.speed);
+          setDownloadedBytes(event.payload.bytesDownloaded);
+          setTotalBytes(event.payload.totalBytes);
+        });
+
+        const unlistenComplete = await listen("ai:download:complete", () => {
+          if (cancelled) return;
+          setModelStatus("ready");
+          setDownloadProgress(100);
+        });
+
+        const status = await invoke<{ modelDownloaded: boolean; modelReady: boolean }>("ai_check_model_status");
+        if (!cancelled) {
+          if (status.modelReady || status.modelDownloaded) {
+            setModelStatus("ready");
+          } else {
+            setModelStatus("prompt");
+          }
+        }
+
+        return () => {
+          unlistenProgress();
+          unlistenComplete();
+        };
+      } catch {
+        if (!cancelled) setModelStatus("error");
+      }
+    }
+
+    const cleanup = checkModel();
+    return () => { cancelled = true; cleanup.then((f) => f?.()); };
+  }, []);
 
   function handleSend() {
     if (!input.trim() || isStreaming) return;
@@ -109,6 +178,16 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
     }
   }, [content, isStreaming]);
 
+  async function handleDownloadModel() {
+    setModelStatus("downloading");
+    try {
+      const { invoke } = await import("@tauri-apps/api/core");
+      await invoke("ai_start_download", { modelName: "qwen3-8b-q4_k_m" });
+    } catch {
+      setModelStatus("error");
+    }
+  }
+
   const statusConfig: Record<AIStatus, { icon: typeof Loader2; text: string; color: string }> = {
     idle: { icon: MessageCircle, text: "", color: "" },
     installing: { icon: Download, text: "Installing AI model... (~4.5 GB)", color: "text-yellow-500" },
@@ -127,6 +206,93 @@ export function AISidebar({ isOpen, onToggle, appContext, selectedText }: AISide
   }
 
   const hasContext = !!(selectedText || input || appContext);
+
+  if (modelStatus === "checking") {
+    return (
+      <div className={cn(
+        "relative flex h-full flex-col border-l border-border bg-surface transition-all duration-300 dark:border-border-dark dark:bg-surface-dark",
+        isOpen ? "w-80 max-w-full" : "w-0 overflow-hidden",
+      )}>
+        <div className="flex h-full min-w-80 flex-col items-center justify-center p-6">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+          <p className="mt-3 text-sm text-gray-400">Checking model status...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (modelStatus === "prompt") {
+    return (
+      <div className={cn(
+        "relative flex h-full flex-col border-l border-border bg-surface transition-all duration-300 dark:border-border-dark dark:bg-surface-dark",
+        isOpen ? "w-80 max-w-full" : "w-0 overflow-hidden",
+      )}>
+        <div className="flex h-full min-w-80 flex-col items-center justify-center p-6 text-center">
+          <Download className="mb-4 h-10 w-10 text-brand-500" />
+          <h3 className="mb-2 text-base font-semibold">Download AI Model</h3>
+          <p className="mb-4 text-xs text-gray-400">
+            nOffice needs the Qwen3 8B AI model (~4.5 GB) to enable AI features.
+          </p>
+          <button
+            className="rounded-lg bg-brand-600 px-5 py-2 text-sm text-white hover:bg-brand-700 transition-colors"
+            onClick={handleDownloadModel}
+          >
+            Start Download
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (modelStatus === "downloading") {
+    return (
+      <div className={cn(
+        "relative flex h-full flex-col border-l border-border bg-surface transition-all duration-300 dark:border-border-dark dark:bg-surface-dark",
+        isOpen ? "w-80 max-w-full" : "w-0 overflow-hidden",
+      )}>
+        <div className="flex h-full min-w-80 flex-col items-center justify-center p-6 text-center">
+          <Download className="mb-4 h-10 w-10 text-brand-500 animate-pulse" />
+          <h3 className="mb-2 text-base font-semibold">Downloading AI Model</h3>
+          <div className="mb-3 h-2 w-full max-w-xs overflow-hidden rounded-full bg-surface-tertiary dark:bg-surface-dark-tertiary">
+            <div
+              className="h-full rounded-full bg-brand-500 transition-all duration-300"
+              style={{ width: `${Math.max(downloadProgress, 2)}%` }}
+            />
+          </div>
+          <p className="mb-1 text-sm font-medium">{downloadProgress}%</p>
+          {totalBytes > 0 && (
+            <div className="flex gap-3 text-[10px] text-gray-400">
+              <span>{formatBytes(downloadedBytes)} / {formatBytes(totalBytes)}</span>
+              <span>{formatSpeed(downloadSpeed)}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (modelStatus === "error") {
+    return (
+      <div className={cn(
+        "relative flex h-full flex-col border-l border-border bg-surface transition-all duration-300 dark:border-border-dark dark:bg-surface-dark",
+        isOpen ? "w-80 max-w-full" : "w-0 overflow-hidden",
+      )}>
+        <div className="flex h-full min-w-80 flex-col items-center justify-center p-6 text-center">
+          <X className="mb-4 h-10 w-10 text-red-500" />
+          <h3 className="mb-2 text-base font-semibold">Download Failed</h3>
+          <p className="mb-4 text-xs text-gray-400">
+            Failed to download the AI model. Check your internet connection and try again.
+          </p>
+          <button
+            className="rounded-lg bg-brand-600 px-5 py-2 text-sm text-white hover:bg-brand-700 transition-colors"
+            onClick={handleDownloadModel}
+          >
+            Retry Download
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
