@@ -1,6 +1,6 @@
 [package]
 name = "noffice"
-version = "2026.7.0"
+version = "2026.7.1"
 description = "nOffice - Cross-platform office suite with local AI"
 authors = ["nOffice Team"]
 edition = "2021"
